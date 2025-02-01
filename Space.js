@@ -30,4 +30,5 @@ function animate() {
 
 animate();
 
-initKeyboardControls(); // TODO: This gets the keyboard controls working by importing it from guiControls.js
+initKeyboardControls(); // TODO: This gets the keyboard controls working by importing it from guiControls.js, 
+// This might only update the speed, rotation and ammo values in the GUI, we might need to import the values to be able to use them 

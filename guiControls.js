@@ -5,6 +5,7 @@ import dat from 'dat.gui';
 export const settings = {
   speed: 1.0,
   rotation: 0,
+  ammo: 100,
   // add additional parameters if needed
 };
 
@@ -22,6 +23,29 @@ speedController.domElement.style.pointerEvents = 'none';
 const rotationInput = rotationController.domElement.querySelector('input');
 rotationInput.disabled = true; // disable the input field unless you use arrow key
 rotationController.domElement.style.pointerEvents = 'none';
+
+//AMMO Section
+export const ammoController = gui.add(settings, 'ammo', 0, 100).listen();
+let lastShotTime = 0; // Timestamp in milliseconds
+function handleSpacebar(event) {
+     
+    if (event.code === 'Space') {
+      const currentTime = Date.now();
+  
+      // Only allow a shot if at least 500ms have passed since the last shot
+      if (currentTime - lastShotTime >= 500) {
+        if (settings.ammo > 1) {
+          settings.ammo -= 1;
+          ammoController.updateDisplay();
+        }
+
+        lastShotTime = currentTime;
+      }
+    }
+  }
+  const ammoInput = ammoController.domElement.querySelector('input');
+  ammoInput.disabled = true; // disable the input field unless you use arrow key
+  ammoController.domElement.style.pointerEvents = 'none';
 
 
 // Optional: helper function to update the controllers
@@ -52,6 +76,8 @@ export function initKeyboardControls() {
         default:
           break;
       }
-      // Optionally, update any three.js objects here
+  
+      // Check for spacebar for ammo
+      handleSpacebar(event);
     });
   }
