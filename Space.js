@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { initKeyboardControls} from './guiControls.js'; 
+import { initKeyboardControls, speedController} from './guiControls.js'; 
 
 
 const scene = new THREE.Scene();
@@ -9,12 +9,18 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 
-function createAsteroid(radius, colors) {
-  //TODO: 
-  const mesh = new THREE.Mesh(geometry, materialArray);
-  return mesh;
+
+function createAsteroid(radius, widthSegments = 32, heightSegments = 32, color = 0xff0000) {
+  // Create sphere geometry
+  const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+  // Create a basic material with a specified color
+  const material = new THREE.MeshBasicMaterial({ color });
+  // Create the mesh combining geometry and material
+  const sphere = new THREE.Mesh(geometry, material);
+  return sphere;
 }
-  
+const sphere = createAsteroid(1);
+scene.add(sphere);
  
 
 //TODO: This is used to set the camera position, the higher the z, the further away the camera is?
@@ -24,6 +30,11 @@ camera.position.z = 6;
 function animate() {
   requestAnimationFrame(animate);
  
+  sphere.rotation.x += 0.01*speedController.getValue();
+  sphere.rotation.y += 0.01*speedController.getValue();
+  if (speedController.getValue() >= 1.2) {
+    console.log("test!");
+  }
 
   renderer.render(scene, camera);
 }
@@ -31,4 +42,5 @@ function animate() {
 animate();
 
 initKeyboardControls(); // TODO: This gets the keyboard controls working by importing it from guiControls.js, 
-// This might only update the speed, rotation and ammo values in the GUI, we might need to import the values to be able to use them 
+// GUI values can be imported using XXXController.getValue() where XXX is the name of the controller
+ 
