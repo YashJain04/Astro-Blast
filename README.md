@@ -10,3 +10,4 @@ CSI4130 Space flight project
 
 # Student Number
 * Nicolas Bérubé - 300239551
+* Gregory Marcelin - 300277019
