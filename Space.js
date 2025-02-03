@@ -1,6 +1,6 @@
 ﻿import * as THREE from 'three';
 import { initKeyboardControls, heightController, lengthController, settings, ammoController} from './guiControls.js'; 
-
+import { OrbitControls } from 'three/examples/jsm/Addons.js'
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -8,7 +8,11 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const controls = new OrbitControls(camera, renderer.domElement);
+const axesHelper = new THREE.AxesHelper(2);
+const gridhelper = new THREE.GridHelper(50, 50);
 
+scene.add(controls, axesHelper, gridhelper) // adding controls and grid axes to help debug 
 
 function createShip(radius, widthSegments = 32, heightSegments = 32, color = 0xff0000) {
   // Create sphere geometry
@@ -28,7 +32,6 @@ function createAsteroidSphere(radius, widthSegments = 32, heightSegments = 32, c
   const sphere = new THREE.Mesh(geometry, material);
   return sphere;
 }
-
 
 const sphere = createShip(1);
 scene.add(sphere);
