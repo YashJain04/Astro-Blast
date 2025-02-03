@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { initKeyboardControls, heightController, lengthController} from './guiControls.js'; 
+import { initKeyboardControls, heightController, lengthController, settings, ammoController} from './guiControls.js'; 
 
 
 const scene = new THREE.Scene();
@@ -26,7 +26,26 @@ scene.add(sphere);
 //TODO: This is used to set the camera position, the higher the z, the further away the camera is?
 camera.position.z = 6;
  
- 
+const bullets = [];
+
+function createBullet() {
+  const geometry = new THREE.SphereGeometry(0.2, 8, 8);
+  const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+  const bullet = new THREE.Mesh(geometry, material);
+  bullet.position.set(sphere.position.x, sphere.position.y, sphere.position.z);
+  scene.add(bullet);
+  bullets.push(bullet);
+}
+
+document.addEventListener('keydown', (event) => {
+  if (event.code === 'Space' && settings.ammo > 0) {
+    //settings.ammo -= 1;
+    ammoController.updateDisplay();
+    createBullet();
+  }
+});
+
+
 function animate() {
   requestAnimationFrame(animate);
  
@@ -35,6 +54,13 @@ function animate() {
   // Move sphere left/right based on rotationController
   sphere.position.x = 1 * lengthController.getValue();
 
+  bullets.forEach((bullet, index) => {
+    bullet.position.y += 0.1;
+    if (bullet.position.y > 5) {
+      scene.remove(bullet);
+      bullets.splice(index, 1);
+    }
+  });
 
   renderer.render(scene, camera);
 }
