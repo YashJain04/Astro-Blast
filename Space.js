@@ -1,6 +1,8 @@
 ﻿import * as THREE from 'three';
 import { initKeyboardControls, heightController, lengthController, settings, ammoController} from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js'
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -8,20 +10,43 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+const ambientLight = new THREE.AmbientLight('white')
 const controls = new OrbitControls(camera, renderer.domElement);
 const axesHelper = new THREE.AxesHelper(2);
 const gridhelper = new THREE.GridHelper(50, 50);
 
-scene.add(controls, axesHelper, gridhelper) // adding controls and grid axes to help debug 
+scene.add(controls, axesHelper, gridhelper, ambientLight) // adding controls and grid axes to help debug 
 
-function createShip(radius, widthSegments = 32, heightSegments = 32, color = 0xff0000) {
-  // Create sphere geometry
-  const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-  // Create a basic material with a specified color
-  const material = new THREE.MeshBasicMaterial({ color });
-  // Create the mesh combining geometry and material
-  const sphere = new THREE.Mesh(geometry, material);
-  return sphere;
+function createShip(scene) {
+  // // Create sphere geometry
+  // const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+  // // Create a basic material with a specified color
+  // const material = new THREE.MeshBasicMaterial({ color });
+  // // Create the mesh combining geometry and material
+  // const sphere = new THREE.Mesh(geometry, material);
+  // return sphere;
+
+  const loader = new GLTFLoader();
+  loader.load( 'models/spaceship.glb', function ( gltf ) {
+    scene.add( gltf.scene );
+      const rocket = gltf.scene
+      rocket.scale.set(0.2, 0.2, 0.2)
+
+      window.addEventListener('keydown', event=>{
+          
+          if (event.key == 'ArrowLeft'){
+              rocket?.rotateZ(-0.05)
+          }
+          else if (event.key == 'ArrowRight'){
+              rocket?.rotateZ(0.05)
+          }
+      })
+
+  }, undefined, function ( error ) {
+    console.error( error );
+  });
+
+
 }
 
 function createAsteroidSphere(radius, widthSegments = 32, heightSegments = 32, color = 0x808080){
@@ -33,8 +58,8 @@ function createAsteroidSphere(radius, widthSegments = 32, heightSegments = 32, c
   return sphere;
 }
 
-const sphere = createShip(1);
-scene.add(sphere);
+const ship = createShip(scene);
+
 
 function createAsteroid() {
   const asteroid = createAsteroidSphere(0.5);
@@ -81,10 +106,10 @@ asteroids.forEach((asteroid, index) => {
 function animate() {
   requestAnimationFrame(animate);
  
-  sphere.position.y = 1 * heightController.getValue();
+  // sphere.position.y = 1 * heightController.getValue();
   
-  // Move sphere left/right based on rotationController
-  sphere.position.x = 1 * lengthController.getValue();
+  // // Move sphere left/right based on rotationController
+  // sphere.position.x = 1 * lengthController.getValue();
 
   bullets.forEach((bullet, index) => {
     bullet.position.y += 0.1;
