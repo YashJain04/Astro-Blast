@@ -10,7 +10,7 @@ document.body.appendChild(renderer.domElement);
 
 
 
-function createAsteroid(radius, widthSegments = 32, heightSegments = 32, color = 0xff0000) {
+function createShip(radius, widthSegments = 32, heightSegments = 32, color = 0xff0000) {
   // Create sphere geometry
   const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
   // Create a basic material with a specified color
@@ -19,14 +19,35 @@ function createAsteroid(radius, widthSegments = 32, heightSegments = 32, color =
   const sphere = new THREE.Mesh(geometry, material);
   return sphere;
 }
-const sphere = createAsteroid(1);
+
+function createAsteroidSphere(radius, widthSegments = 32, heightSegments = 32, color = 0x808080){
+  const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+  // Create a basic material with a specified color
+  const material = new THREE.MeshBasicMaterial({ color });
+  // Create the mesh combining geometry and material
+  const sphere = new THREE.Mesh(geometry, material);
+  return sphere;
+}
+
+
+const sphere = createShip(1);
 scene.add(sphere);
+
+function createAsteroid() {
+  const asteroid = createAsteroidSphere(0.5);
+  asteroid.position.set(Math.random() * 14 - 7, 5, 0);
+  scene.add(asteroid);
+  asteroids.push(asteroid);
+}
  
+setInterval(createAsteroid, 2000);
 
 //TODO: This is used to set the camera position, the higher the z, the further away the camera is?
 camera.position.z = 6;
  
 const bullets = [];
+const asteroids = [];
+
 
 function createBullet() {
   const geometry = new THREE.SphereGeometry(0.2, 8, 8);
@@ -42,6 +63,14 @@ document.addEventListener('keydown', (event) => {
     //settings.ammo -= 1;
     ammoController.updateDisplay();
     createBullet();
+  }
+});
+
+asteroids.forEach((asteroid, index) => {
+  asteroid.position.y -= 0.05;
+  if (asteroid.position.y < -3.5) {
+    scene.remove(asteroid);
+    asteroids.splice(index, 1);
   }
 });
 
@@ -61,6 +90,16 @@ function animate() {
       bullets.splice(index, 1);
     }
   });
+
+
+  asteroids.forEach((asteroid, index) => {
+    asteroid.position.y -= 0.05;
+    if (asteroid.position.y < -3.5) {
+      scene.remove(asteroid);
+      asteroids.splice(index, 1);
+    }
+  });
+
 
   renderer.render(scene, camera);
 }
