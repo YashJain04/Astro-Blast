@@ -3,81 +3,73 @@ import dat from 'dat.gui';
 
 // Define your settings object
 export const settings = {
-  speed: 1.0,
-  rotation: 0,
+  height: 1.0,
+  length: 1.0,
   ammo: 100,
-  // add additional parameters if needed
 };
 
 // Initialize the GUI
 export const gui = new dat.GUI();
 
 // Add controllers for the parameters
-export const speedController = gui.add(settings, 'speed', 0, 5);
-export const rotationController = gui.add(settings, 'rotation', 0, Math.PI * 2);
+export const heightController = gui.add(settings, 'height', -3, 3);
+export const lengthController = gui.add(settings, 'length', -7, 7);
 
-const speedInput = speedController.domElement.querySelector('input');
-speedInput.disabled = true; // disable the input field unless you use arrow key
-speedController.domElement.style.pointerEvents = 'none';
+const heightInput = heightController.domElement.querySelector('input');
+heightInput.disabled = true;
+heightController.domElement.style.pointerEvents = 'none';
 
-const rotationInput = rotationController.domElement.querySelector('input');
-rotationInput.disabled = true; // disable the input field unless you use arrow key
-rotationController.domElement.style.pointerEvents = 'none';
+const lengthInput = lengthController.domElement.querySelector('input');
+lengthInput.disabled = true;
+lengthController.domElement.style.pointerEvents = 'none';
 
-//AMMO Section
+// AMMO Section
 export const ammoController = gui.add(settings, 'ammo', 0, 100).listen();
-let lastShotTime = 0; // Timestamp in milliseconds
+let lastShotTime = 0;
 function handleSpacebar(event) {
-     
     if (event.code === 'Space') {
       const currentTime = Date.now();
-  
-      // Only allow a shot if at least 500ms have passed since the last shot
-      if (currentTime - lastShotTime >= 500) {
+      if (currentTime - lastShotTime >= 50) {
         if (settings.ammo > 1) {
           settings.ammo -= 1;
           ammoController.updateDisplay();
         }
-
         lastShotTime = currentTime;
       }
     }
-  }
-  const ammoInput = ammoController.domElement.querySelector('input');
-  ammoInput.disabled = true; // disable the input field unless you use arrow key
-  ammoController.domElement.style.pointerEvents = 'none';
-
+}
+const ammoInput = ammoController.domElement.querySelector('input');
+ammoInput.disabled = true;
+ammoController.domElement.style.pointerEvents = 'none';
 
 // Optional: helper function to update the controllers
 export function updateGUI() {
-  speedController.updateDisplay();
-  rotationController.updateDisplay();
+  heightController.updateDisplay();
+  lengthController.updateDisplay();
 }
 
 export function initKeyboardControls() {
     document.addEventListener('keydown', (event) => {
       switch (event.key) {
         case 'ArrowUp':
-          settings.speed = Math.min(settings.speed + 0.1, 5);
-          speedController.updateDisplay();
+          settings.height = Math.min(3, settings.height + 0.1);
+          heightController.updateDisplay();
           break;
         case 'ArrowDown':
-          settings.speed = Math.max(settings.speed - 0.1, 0);
-          speedController.updateDisplay();
+          settings.height = Math.max(-3, settings.height - 0.1);
+          heightController.updateDisplay();
           break;
         case 'ArrowRight':
-          settings.rotation += 0.1;
-          rotationController.updateDisplay();
+          settings.length = Math.min(7, settings.length + 0.1);
+          lengthController.updateDisplay();
           break;
         case 'ArrowLeft':
-          settings.rotation -= 0.1;
-          rotationController.updateDisplay();
+          settings.length = Math.max(-7, settings.length - 0.1);
+          lengthController.updateDisplay();
           break;
         default:
           break;
       }
-  
-      // Check for spacebar for ammo
       handleSpacebar(event);
     });
-  }
+}

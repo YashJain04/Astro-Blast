@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { initKeyboardControls, speedController} from './guiControls.js'; 
+import { initKeyboardControls, heightController, lengthController} from './guiControls.js'; 
 
 
 const scene = new THREE.Scene();
@@ -30,11 +30,11 @@ camera.position.z = 6;
 function animate() {
   requestAnimationFrame(animate);
  
-  sphere.rotation.x += 0.01*speedController.getValue();
-  sphere.rotation.y += 0.01*speedController.getValue();
-  if (speedController.getValue() >= 1.2) {
-    console.log("test!");
-  }
+  sphere.position.y = 1 * heightController.getValue();
+  
+  // Move sphere left/right based on rotationController
+  sphere.position.x = 1 * lengthController.getValue();
+
 
   renderer.render(scene, camera);
 }
