@@ -29,7 +29,7 @@ let lastShotTime = 0;
 function handleSpacebar(event) {
     if (event.code === 'Space') {
       const currentTime = Date.now();
-      if (currentTime - lastShotTime >= 50) {
+      if (currentTime - lastShotTime >= 500) {
         if (settings.ammo > 1) {
           settings.ammo -= 1;
           ammoController.updateDisplay();
