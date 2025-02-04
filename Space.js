@@ -18,13 +18,6 @@ const gridhelper = new THREE.GridHelper(50, 50);
 scene.add(controls, axesHelper, gridhelper, ambientLight) // adding controls and grid axes to help debug 
 
 function createShip(scene) {
-  // // Create sphere geometry
-  // const geometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
-  // // Create a basic material with a specified color
-  // const material = new THREE.MeshBasicMaterial({ color });
-  // // Create the mesh combining geometry and material
-  // const sphere = new THREE.Mesh(geometry, material);
-  // return sphere;
 
   const loader = new GLTFLoader();
   loader.load( 'models/spaceship.glb', function ( gltf ) {
@@ -62,10 +55,18 @@ const ship = createShip(scene);
 
 
 function createAsteroid() {
-  const asteroid = createAsteroidSphere(0.5);
-  asteroid.position.set(Math.random() * 14 - 7, 5, 0);
-  scene.add(asteroid);
-  asteroids.push(asteroid);
+  
+  const loader = new GLTFLoader();
+  loader.load( 'models/asteroids/asteroid1.glb', function ( gltf ) {
+    scene.add( gltf.scene );
+      const asteroid = gltf.scene
+      asteroid.position.set(Math.random() * 14 - 7, 5, 0);
+      scene.add(asteroid);
+      asteroids.push(asteroid);
+
+  }, undefined, function ( error ) {
+    console.error( error );
+  });
 }
  
 setInterval(createAsteroid, 2000);
