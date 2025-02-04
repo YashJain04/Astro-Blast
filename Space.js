@@ -3,7 +3,6 @@ import { initKeyboardControls, heightController, lengthController, settings, amm
 import { OrbitControls } from 'three/examples/jsm/Addons.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer();
@@ -55,9 +54,13 @@ const ship = createShip(scene);
 
 
 function createAsteroid() {
-  
+
+  /*Randomly choses a model from the list of all asteroid models */
+  const numAsteroidModels = 6
+  const randomlyChosenAsteroidModel = Math.floor(Math.random() * numAsteroidModels) + 1
+
   const loader = new GLTFLoader();
-  loader.load( 'models/asteroids/asteroid1.glb', function ( gltf ) {
+  loader.load( `models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function ( gltf ) {
     scene.add( gltf.scene );
       const asteroid = gltf.scene
       asteroid.position.set(Math.random() * 14 - 7, 5, 0);
