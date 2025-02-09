@@ -48,7 +48,7 @@ loader.load('models/spaceship.glb', function (gltf) {
     rocket = gltf.scene;
     rocketGroup.add(rocket)
     rocket.scale.set(0.2, 0.2, 0.2);
-    rocket.rotation.y = -Math.PI/2;
+    // rocket.rotation.y = Math.PI;
   
 }, undefined, function (error) {
     console.error(error);
@@ -145,21 +145,34 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+//angular velocity and acceleration of the spaceship
+let angularVelocity = 0.01
+let angularAcceleration = 0
+
 /**this function animates the spaceship. It will apply the idle/moving animations etc depending on
  * the state of the key presses
  */
 function animateSpaceship(){
 
-    if (rocket != null){
+    if (rocket != null){  
+
+        const DAMPING_FACTOR = 0.007
+        const INERTIA = 0.001
 
         //if player is not pressing 'left' or 'right', display idle animation
         if (!arrowKeysState[1] && !arrowKeysState[3]){
+
             rocket.position.set(0, 0.2 * Math.cos(Date.now() * 0.002), 0)
-            rocket.rotation.set(0, 0, 0.1 * Math.sin(Date.now() * 0.002))
+      
+            //physics for rotation of the spaceship
+            angularAcceleration = -1 * INERTIA * rocket.rotation.z - DAMPING_FACTOR * angularVelocity
+            angularVelocity += angularAcceleration
+            rocket.rotation.z += angularVelocity + 0.5 * angularAcceleration
+
         }
         else{
 
-            const rotationAngleCap = 0.1 * Math.PI
+            const rotationAngleCap = 0.2 * Math.PI
 
             //player is pressing left key
             if (arrowKeysState[3]){
@@ -198,7 +211,8 @@ function animate(currentDelta) {
 
     requestAnimationFrame(animate);
 
-    var delta = currentDelta - previousDelta;
+    var delta = currentDelta - previousDelta
+    // console.log(delta)
     const FPS = fpsController.getValue()
 
     if (FPS && delta < 1000 / FPS) {
