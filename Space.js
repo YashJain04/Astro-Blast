@@ -151,8 +151,43 @@ document.addEventListener('keydown', (event) => {
 function animateSpaceship(){
 
     if (rocket != null){
-        rocket.position.set(0, 0.2 * Math.cos(Date.now() * 0.002), 0)
-        rocket.rotation.set(0, 0, 0.1 * Math.sin(Date.now() * 0.002))
+
+        //if player is not pressing 'left' or 'right', display idle animation
+        if (!arrowKeysState[1] && !arrowKeysState[3]){
+            rocket.position.set(0, 0.2 * Math.cos(Date.now() * 0.002), 0)
+            rocket.rotation.set(0, 0, 0.1 * Math.sin(Date.now() * 0.002))
+        }
+        else{
+
+            const rotationAngleCap = 0.1 * Math.PI
+
+            //player is pressing left key
+            if (arrowKeysState[3]){
+                rocketGroup.position.z += 0.05
+                rocket.rotateZ(-0.01)
+                if (rocket.rotation.z <=  -1 * rotationAngleCap){
+                    rocket.rotation.z = -1 * rotationAngleCap
+                }
+                rocketGroup.position.z += 0.05
+            }
+
+            //player is pressing right key
+            else if (arrowKeysState[1]){
+                rocketGroup.position.z -= 0.05
+                rocket.rotateZ(0.01)
+                if (rocket.rotation.z >= rotationAngleCap){
+                    rocket.rotation.z = rotationAngleCap
+                }
+            }
+            
+
+        }
+
+        
+
+        
+      
+        
     }
 
 }
@@ -188,8 +223,6 @@ function animate(currentDelta) {
         }
     });
     renderer.render(scene, camera);
-
-    console.log(arrowKeysState)
 
     previousDelta = currentDelta;
 
