@@ -28,6 +28,7 @@ let bulletModel;
 let lastShotTime = 0;
 
 rocketGroup = new THREE.Group()
+rocketGroup.rotateY(-Math.PI/2)
 scene.add(rocketGroup)
 
 const loader = new GLTFLoader();
@@ -118,14 +119,12 @@ function animateSpaceship(){
     }
 
 }
-var updateId
-var previousDelta = 0
+
+// FPS related stuff
+let previousDelta = 0
 function animate(currentDelta) {
 
-    // requestAnimationFrame(animate);
-    
-
-    updateId = requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 
     var delta = currentDelta - previousDelta;
     const FPS = fpsController.getValue()
