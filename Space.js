@@ -41,13 +41,13 @@ loader.load('models/spaceship.glb', function (gltf) {
     
     window.addEventListener('keydown', event => {
         if (event.key == 'ArrowUp') {
-            rocket.position.x -= 0.5;
+            rocketGroup.position.x -= 0.5;
         } else if (event.key == 'ArrowDown') {
-            rocket.position.x += 0.5;
+            rocketGroup.position.x += 0.5;
         } else if (event.key == 'ArrowRight') {
-            rocket.position.z -= 0.5;
+            rocketGroup.position.z -= 0.5;
         } else if (event.key == 'ArrowLeft') {
-            rocket.position.z += 0.5;
+            rocketGroup.position.z += 0.5;
         }
     });
 }, undefined, function (error) {
