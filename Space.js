@@ -1,7 +1,8 @@
 ﻿import * as THREE from 'three';
-import { initKeyboardControls, heightController, lengthController, settings, ammoController } from './guiControls.js'; 
+import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -117,10 +118,21 @@ function animateSpaceship(){
     }
 
 }
+var updateId
+var previousDelta = 0
+function animate(currentDelta) {
 
-function animate() {
-    console.log(Date.now())
-    requestAnimationFrame(animate);
+    // requestAnimationFrame(animate);
+    
+
+    updateId = requestAnimationFrame(animate);
+
+    var delta = currentDelta - previousDelta;
+    const FPS = fpsController.getValue()
+
+    if (FPS && delta < 1000 / FPS) {
+        return;
+    }
 
     animateSpaceship()
 
@@ -139,8 +151,10 @@ function animate() {
             asteroids.splice(index, 1);
         }
     });
-
     renderer.render(scene, camera);
+
+    previousDelta = currentDelta;
+
 }
 
 // Added light to the scene, otherwise stuff was black
@@ -148,5 +162,5 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(5, 5, 5);
 scene.add(directionalLight);
 
-animate();
+animate(fpsController.getValue()); //60 FPS by default, can be changed on the dat.gui
 initKeyboardControls();
