@@ -27,6 +27,17 @@ let rocket, rocketGroup;
 let bulletModel;
 let lastShotTime = 0;
 
+
+/**
+ * keys state
+ * 0 : up key
+ * 1 : right key pressed
+ * 2 : down key pressed
+ * 3 : left key pressed
+ */
+let arrowKeysState = [false, false, false, false] 
+initKeypressEventListeners()
+
 rocketGroup = new THREE.Group()
 rocketGroup.rotateY(-Math.PI/2)
 scene.add(rocketGroup)
@@ -38,18 +49,7 @@ loader.load('models/spaceship.glb', function (gltf) {
     rocketGroup.add(rocket)
     rocket.scale.set(0.2, 0.2, 0.2);
     rocket.rotation.y = -Math.PI/2;
-    
-    window.addEventListener('keydown', event => {
-        if (event.key == 'ArrowUp') {
-            rocketGroup.position.x -= 0.5;
-        } else if (event.key == 'ArrowDown') {
-            rocketGroup.position.x += 0.5;
-        } else if (event.key == 'ArrowRight') {
-            rocketGroup.position.z -= 0.5;
-        } else if (event.key == 'ArrowLeft') {
-            rocketGroup.position.z += 0.5;
-        }
-    });
+  
 }, undefined, function (error) {
     console.error(error);
 });
@@ -63,6 +63,43 @@ loader.load('models/rocket.glb', function (gltf) {
 
 const bullets = [];
 const asteroids = [];
+
+function initKeypressEventListeners(){
+
+    function onKeyDown(event){
+        if (event.key == 'ArrowUp') {
+            arrowKeysState[0] = true;
+        }
+        if (event.key == 'ArrowRight') {
+            arrowKeysState[1] = true;
+        }
+        if (event.key == 'ArrowDown') {
+            arrowKeysState[2] = true;
+        }
+        if (event.key == 'ArrowLeft') {
+            arrowKeysState[3] = true;
+        } 
+    }
+
+    function onKeyUp(event){
+        if (event.key == 'ArrowUp') {
+            arrowKeysState[0] = false;
+        }
+        if (event.key == 'ArrowRight') {
+            arrowKeysState[1] = false;
+        }
+        if (event.key == 'ArrowDown') {
+            arrowKeysState[2] = false;
+        }
+        if (event.key == 'ArrowLeft') {
+            arrowKeysState[3] = false;
+        } 
+    }
+
+    window.addEventListener('keydown', onKeyDown, false);
+    window.addEventListener('keyup', onKeyUp, false);
+
+}
 
 function createAsteroid() {
     const numAsteroidModels = 6;
@@ -151,6 +188,8 @@ function animate(currentDelta) {
         }
     });
     renderer.render(scene, camera);
+
+    console.log(arrowKeysState)
 
     previousDelta = currentDelta;
 
