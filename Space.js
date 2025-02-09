@@ -14,12 +14,11 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const axesHelper = new THREE.AxesHelper(2);
 const gridhelper = new THREE.GridHelper(50, 50);
 
-// Added verticle grid
+// Added vertical grid
 const verticalGrid = new THREE.GridHelper(50, 50);
 verticalGrid.rotation.x = Math.PI / 2; // Rotate 90 degrees to align with the YZ plane
 verticalGrid.position.z = -25; // Move the grid to the back of the scene
 scene.add(verticalGrid);
-
 
 scene.add(controls, axesHelper, gridhelper, ambientLight);
 
@@ -32,12 +31,17 @@ loader.load('models/spaceship.glb', function (gltf) {
     scene.add(gltf.scene);
     rocket = gltf.scene;
     rocket.scale.set(0.2, 0.2, 0.2);
+    rocket.rotation.y = -Math.PI/2;
     
     window.addEventListener('keydown', event => {
-        if (event.key == 'ArrowLeft') {
-            rocket?.rotateZ(-0.05);
+        if (event.key == 'ArrowUp') {
+            rocket.position.x -= 0.5;
+        } else if (event.key == 'ArrowDown') {
+            rocket.position.x += 0.5;
         } else if (event.key == 'ArrowRight') {
-            rocket?.rotateZ(0.05);
+            rocket.position.z -= 0.5;
+        } else if (event.key == 'ArrowLeft') {
+            rocket.position.z += 0.5;
         }
     });
 }, undefined, function (error) {
@@ -49,8 +53,6 @@ loader.load('models/rocket.glb', function (gltf) {
     bulletModel.scale.set(0.05, 0.05, 0.05);
 }, undefined, function (error) {
     console.error(error);
-
-    
 });
 
 const bullets = [];
@@ -63,7 +65,7 @@ function createAsteroid() {
     loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
         scene.add(gltf.scene);
         const asteroid = gltf.scene;
-        asteroid.position.set(Math.random() * 14 - 7, 15, 0);
+        asteroid.position.set(-15, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
         scene.add(asteroid);
         asteroids.push(asteroid);
     }, undefined, function (error) {
@@ -76,22 +78,22 @@ setInterval(createAsteroid, 2000);
 camera.position.z = 6;
 
 document.addEventListener('keydown', (event) => {
-  const now = Date.now(); 
+    const now = Date.now(); 
     if (event.code === 'Space' && settings.ammo > 0 && bulletModel && now - lastShotTime >= 500) {
         lastShotTime = now;
         ammoController.updateDisplay();
         
         const bullet = bulletModel.clone();
         bullet.position.copy(rocket.position);
-        bullet.position.z += 1.25; 
+        bullet.position.x -= 1.25; 
         bullet.position.y += 1.25; 
-        bullet.rotation.z = -1  ; 
+        bullet.rotation.z = -0 ;
 
         // Create a small red sphere on top of the bullet
         const sphereGeometry = new THREE.SphereGeometry(2, 16, 16);
         const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const redSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        redSphere.position.set(0, 0.1, 0); // Adjust position to sit on top of the bullet
+        redSphere.position.set(0, 0.1, 0);
         bullet.add(redSphere);
 
         scene.add(bullet);
@@ -104,16 +106,16 @@ function animate() {
     requestAnimationFrame(animate);
 
     bullets.forEach((bullet, index) => {
-        bullet.position.y += 0.1;
-        if (bullet.position.y > 15) {
+        bullet.position.x -= 0.1;
+        if (bullet.position.x < -15) {
             scene.remove(bullet);
             bullets.splice(index, 1);
         }
     });
 
     asteroids.forEach((asteroid, index) => {
-        asteroid.position.y -= 0.05;
-        if (asteroid.position.y < -3.5) {
+        asteroid.position.x += 0.15; // Move asteroids from left to right
+        if (asteroid.position.x > 15) { // Remove asteroid when it goes off-screen
             scene.remove(asteroid);
             asteroids.splice(index, 1);
         }
