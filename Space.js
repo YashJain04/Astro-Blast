@@ -22,14 +22,18 @@ scene.add(verticalGrid);
 
 scene.add(controls, axesHelper, gridhelper, ambientLight);
 
-let rocket;
+let rocket, rocketGroup;
 let bulletModel;
 let lastShotTime = 0;
+
+rocketGroup = new THREE.Group()
+scene.add(rocketGroup)
 
 const loader = new GLTFLoader();
 loader.load('models/spaceship.glb', function (gltf) {
     scene.add(gltf.scene);
     rocket = gltf.scene;
+    rocketGroup.add(rocket)
     rocket.scale.set(0.2, 0.2, 0.2);
     rocket.rotation.y = -Math.PI/2;
     
@@ -102,8 +106,23 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
+/**this function animates the spaceship. It will apply the idle/moving animations etc depending on
+ * the state of the key presses
+ */
+function animateSpaceship(){
+
+    if (rocket != null){
+        rocket.position.set(0, 0.2 * Math.cos(Date.now() * 0.002), 0)
+        rocket.rotation.set(0, 0, 0.1 * Math.sin(Date.now() * 0.002))
+    }
+
+}
+
 function animate() {
+    console.log(Date.now())
     requestAnimationFrame(animate);
+
+    animateSpaceship()
 
     bullets.forEach((bullet, index) => {
         bullet.position.x -= 0.1;
