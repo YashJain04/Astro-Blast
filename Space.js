@@ -48,7 +48,7 @@ loader.load('models/spaceship.glb', function (gltf) {
     rocket = gltf.scene;
     rocketGroup.add(rocket)
     rocket.scale.set(0.2, 0.2, 0.2);
-    // rocket.rotation.y = Math.PI;
+    rocket.position.y = 0.5;
   
 }, undefined, function (error) {
     console.error(error);
@@ -149,6 +149,11 @@ document.addEventListener('keydown', (event) => {
 let angularVelocity = 0.01
 let angularAcceleration = 0
 
+let linearVelocity = [0, 0, 0]
+let linearAcceleration = [0, 0, 0]
+
+
+
 /**this function animates the spaceship. It will apply the idle/moving animations etc depending on
  * the state of the key presses
  */
@@ -159,11 +164,16 @@ function animateSpaceship(){
         const DAMPING_FACTOR = 0.007
         const INERTIA = 0.001
 
+        
+
         //if player is not pressing 'left' or 'right', display idle animation
         if (!arrowKeysState[1] && !arrowKeysState[3]){
 
-            rocket.position.set(0, 0.2 * Math.cos(Date.now() * 0.002), 0)
-      
+            //physics for movement of the spaceship
+            linearAcceleration[1] = -1 * INERTIA * rocket.position.y
+            linearVelocity[1] += linearAcceleration[1]
+            rocket.position.y += linearVelocity[1] + 0.5 * linearAcceleration[1]
+
             //physics for rotation of the spaceship
             angularAcceleration = -1 * INERTIA * rocket.rotation.z - DAMPING_FACTOR * angularVelocity
             angularVelocity += angularAcceleration
@@ -172,7 +182,17 @@ function animateSpaceship(){
         }
         else{
 
+            const HEIGHT_DIP_CAP = -0.5
+            const DIP_ACCELERATION = -0.0005
             const rotationAngleCap = 0.2 * Math.PI
+
+            linearAcceleration[1] = DIP_ACCELERATION
+            linearVelocity[1] += linearAcceleration[1]
+            rocket.position.y += linearVelocity[1] + 0.5 * linearAcceleration[1]
+            if (rocket.position.y <= HEIGHT_DIP_CAP){
+                linearVelocity[1] = 0
+                rocket.position.y = HEIGHT_DIP_CAP
+            }
 
             //player is pressing left key
             if (arrowKeysState[3]){
@@ -220,6 +240,7 @@ function animate(currentDelta) {
     }
 
     animateSpaceship()
+    console.log(rocket.position)
 
     bullets.forEach((bullet, index) => {
         bullet.position.x -= 0.1;

@@ -1,7 +1,12 @@
 {
   "dependencies": {
     "dat.gui": "^0.7.9",
-    "three": "^0.173.0",
+    "three": "^0.173.0"
+  },
+  "devDependencies": {
     "vite": "^6.1.0"
+  },
+  "scripts": {
+    "dev": "vite dev"
   }
 }
