@@ -20,9 +20,9 @@ const gridhelper = new THREE.GridHelper(50, 50);
 const verticalGrid = new THREE.GridHelper(50, 50);
 verticalGrid.rotation.x = Math.PI / 2; // Rotate 90 degrees to align with the YZ plane
 verticalGrid.position.z = -25; // Move the grid to the back of the scene
-scene.add(verticalGrid);
+//scene.add(verticalGrid, gridhelper);
 
-scene.add(controls, axesHelper, gridhelper, ambientLight);
+scene.add(controls, axesHelper, ambientLight);
 
 let rocket, rocketGroup;
 let bulletModel;
@@ -31,6 +31,8 @@ let lastShotTime = 0;
 const missileSpeed = 0.25;
 const missileLifetime = 5000; // 5 seconds in milliseconds
 const targetDistanceThreshold = 10; // Minimum distance for missle to target asteroid
+
+ 
 
 /**
  * keys state
@@ -72,6 +74,29 @@ loader.load('models/rocket.glb', function (gltf) {
 }, undefined, function (error) {
     console.error(error);
 });
+
+// Shield
+const material = new THREE.PointsMaterial({
+    color: 0x0050FF, // Orange color
+    size: 0.1,       // Adjust point size
+    transparent: false,
+    opacity: 0.9
+});
+const shield = new THREE.Points(new THREE.IcosahedronGeometry(5, 5), material);
+rocketGroup.add(shield);
+shield.scale.set(0.5, 0.5, 0.75);
+
+// Warp field (could be removed later, its just a placeholder)
+const warpField = new THREE.PointsMaterial({
+    color: 0x0050FF, // Orange color
+    size: 0.1,       // Adjust point size
+    transparent: false,
+    opacity: 0.9
+});
+const warp = new THREE.Points(new THREE.IcosahedronGeometry(5, 8), material);
+scene.add(warp);
+warp.scale.set(2, 2, 25);
+warp.rotateY(Math.PI / 2);
 
 const bullets = [];
 const asteroids = [];
@@ -155,6 +180,11 @@ document.addEventListener('keydown', (event) => {
         scene.add(bullet);
         bullets.push({ mesh: bullet, spawnTime: Date.now() }); // Store the spawn time of the bullet and the mesh itself
         console.log('Pew pew');
+    }
+    if (event.key === 'f'){
+        shield.visible = !shield.visible;
+        warp.visible = !warp.visible; 
+        fireEffect.visible();
     }
 });
 
@@ -262,6 +292,10 @@ function animate(currentDelta) {
             asteroids.splice(index, 1);
         }
     });
+
+    shield.rotation.z += 0.01;
+    warp.rotation.z += 0.015;
+
     renderer.render(scene, camera);
 
     previousDelta = currentDelta;
@@ -308,3 +342,5 @@ function findClosestTarget(position, targets) {
         return position.distanceTo(target.position) < position.distanceTo(closest.position) ? target : closest;
     }, targets[0]);
 }
+
+ 

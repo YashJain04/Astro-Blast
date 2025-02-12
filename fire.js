@@ -34,7 +34,7 @@ export class FireEffect {
     createFireParticle(origin, locationZ, locationY) {
         const index = Math.floor(Math.random() * this.particleCount);
         const positionAttribute = this.particleGeometry.getAttribute('position');
-        positionAttribute.setXYZ(index, origin.x, locationY, locationZ);
+        positionAttribute.setXYZ(index, origin.x, locationY, origin.z);
         
 
         const direction = new THREE.Vector3( //direction where the firew ill go
@@ -94,5 +94,11 @@ export class FireEffect {
             this.fireParticles.push(this.createFireParticle(coneBaseCenter, locationZ, locationY));
         }
         this.updateParticles();
+        this.particles.visible != this.particles.visible;
+    }
+
+    visible(){
+        console.log("visible");
+        this.particles.visible = !this.particles.visible;
     }
 }
