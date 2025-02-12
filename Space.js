@@ -2,6 +2,7 @@
 import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { FireEffect } from './fire.js'; // Fire particle
 
 
 const scene = new THREE.Scene();
@@ -50,6 +51,14 @@ loader.load('models/spaceship.glb', function (gltf) {
     rocket.scale.set(0.2, 0.2, 0.2);
     rocket.position.y = 0.5;
   
+    const sphereGeometry = new THREE.ConeGeometry(1, 2, 16);
+    const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
+    const orangeSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    orangeSphere.position.set(0, 5.5, -10.25);
+    orangeSphere.rotation.x = -Math.PI / 2;
+    rocket.add(orangeSphere);
+
+
 }, undefined, function (error) {
     console.error(error);
 });
@@ -225,6 +234,8 @@ function animateSpaceship(){
 
 }
 
+const fireEffect = new FireEffect(rocketGroup); //Used for fire particle
+
 // FPS related stuff
 let previousDelta = 0
 function animate(currentDelta) {
@@ -240,7 +251,12 @@ function animate(currentDelta) {
     }
 
     animateSpaceship()
-    console.log(rocket.position)
+    if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
+        fireEffect.animate(rocketGroup.position.z, rocket.position.y);
+    }
+    //console.log(rocket.position.y)
+    //console.log(rocketGroup.position)
+    //console.log(rocketGroup.position.z);
 
     bullets.forEach((bullet, index) => {
         bullet.position.x -= 0.1;
@@ -260,6 +276,7 @@ function animate(currentDelta) {
     renderer.render(scene, camera);
 
     previousDelta = currentDelta;
+    
 
 }
 
