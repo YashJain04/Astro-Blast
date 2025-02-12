@@ -28,6 +28,9 @@ let rocket, rocketGroup;
 let bulletModel;
 let lastShotTime = 0;
 
+const missileSpeed = 0.25;
+const missileLifetime = 5000; // 5 seconds in milliseconds
+const targetDistanceThreshold = 10; // Minimum distance for missle to target asteroid
 
 /**
  * keys state
@@ -150,7 +153,7 @@ document.addEventListener('keydown', (event) => {
         bullet.add(redSphere);
 
         scene.add(bullet);
-        bullets.push(bullet);
+        bullets.push({ mesh: bullet, spawnTime: Date.now() }); // Store the spawn time of the bullet and the mesh itself
         console.log('Pew pew');
     }
 });
@@ -222,17 +225,8 @@ function animateSpaceship(){
                     rocket.rotation.z = rotationAngleCap
                 }
             }
-            
-
         }
-
-        
-
-        
-      
-        
     }
-
 }
 
 const fireEffect = new FireEffect(rocketGroup); //Used for fire particle
@@ -259,13 +253,7 @@ function animate(currentDelta) {
     //console.log(rocketGroup.position)
     //console.log(rocketGroup.position.z);
 
-    bullets.forEach((bullet, index) => {
-        bullet.position.x -= 0.1;
-        if (bullet.position.x < -15) {
-            scene.remove(bullet);
-            bullets.splice(index, 1);
-        }
-    });
+    if(asteroids.length != 0){updateHomingMissiles(bullets, asteroids)}
 
     asteroids.forEach((asteroid, index) => {
         asteroid.position.x += 0.15; // Move asteroids from left to right
@@ -277,8 +265,6 @@ function animate(currentDelta) {
     renderer.render(scene, camera);
 
     previousDelta = currentDelta;
-    
-
 }
 
 // Added light to the scene, otherwise stuff was black
@@ -288,3 +274,37 @@ scene.add(directionalLight);
 
 animate(fpsController.getValue()); //60 FPS by default, can be changed on the dat.gui
 initKeyboardControls();
+
+
+/**
+ * Function to update homing behavior for multiple missiles
+ * @param {*} missiles 
+ * @param {*} asteroid 
+ */
+function updateHomingMissiles(missiles, targets) {
+    const currentTime = Date.now();
+    for (let i = missiles.length - 1; i >= 0; i--) {
+        let missile = missiles[i];
+        if (currentTime - missile.spawnTime > missileLifetime) {
+            scene.remove(missile.mesh);
+            missiles.splice(i, 1);
+            continue;
+        }
+        let closestTarget = findClosestTarget(missile.mesh.position, targets);
+        let directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
+        directionVector.normalize();
+        missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+    }
+}
+
+/**
+ * Find's the closest asteroid for the missle to target
+ * @param {*} position 
+ * @param {*} targets 
+ * @returns 
+ */
+function findClosestTarget(position, targets) {
+    return targets.reduce((closest, target) => {
+        return position.distanceTo(target.position) < position.distanceTo(closest.position) ? target : closest;
+    }, targets[0]);
+}

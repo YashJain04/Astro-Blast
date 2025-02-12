@@ -1,5 +1,8 @@
 import * as THREE from 'three';
 
+/**
+ * FireEffect class to create fire particles
+ */
 export class FireEffect {
     constructor(scene) {
         this.scene = scene;
@@ -78,6 +81,12 @@ export class FireEffect {
         colorAttribute.needsUpdate = true;
     }
 
+    /**
+     * Uses the Z location information from rocketGroup and the Y information from rocket to decide where the fire comes from
+     * @param {*} locationZ 
+     * @param {*} locationY 
+     * 
+     */
     animate(locationZ, locationY) {
         //console.log(location);
         const coneBaseCenter = new THREE.Vector3(-1, 0, 0); // Fire starts from left, moves right
