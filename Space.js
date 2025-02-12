@@ -136,9 +136,10 @@ document.addEventListener('keydown', (event) => {
         ammoController.updateDisplay();
         
         const bullet = bulletModel.clone();
-        bullet.position.copy(rocket.position);
+        bullet.position.copy(rocketGroup.position);
+        bullet.position.y = rocket.position.y;
         bullet.position.x -= 1.25; 
-        bullet.position.y += 1.25; 
+        bullet.position.y += 1.35; 
         bullet.rotation.z = -0 ;
 
         // Create a small red sphere on top of the bullet
