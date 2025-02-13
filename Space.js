@@ -145,7 +145,7 @@ function createAsteroid() {
     loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
         scene.add(gltf.scene);
         const asteroid = gltf.scene;
-        asteroid.position.set(-15, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
+        asteroid.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
         scene.add(asteroid);
         asteroids.push(asteroid);
     }, undefined, function (error) {
@@ -317,17 +317,40 @@ initKeyboardControls();
  */
 function updateHomingMissiles(missiles, targets) {
     const currentTime = Date.now();
+    const initialForwardTime = 750; // 0.75 seconds to go forward before homing
+
     for (let i = missiles.length - 1; i >= 0; i--) {
         let missile = missiles[i];
+
         if (currentTime - missile.spawnTime > missileLifetime) {
             scene.remove(missile.mesh);
             missiles.splice(i, 1);
             continue;
         }
-        let closestTarget = findClosestTarget(missile.mesh.position, targets);
-        let directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
-        directionVector.normalize();
-        missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+
+        let directionVector;
+
+        if (currentTime - missile.spawnTime < initialForwardTime) {
+            // Initial forward movement
+            directionVector = new THREE.Vector3(-1, 0, 0); 
+            missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+
+        } else {
+            // Homing behavior
+            let closestTarget = findClosestTarget(missile.mesh.position, targets);
+            if (closestTarget) { // Check if a target was found
+                directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
+                directionVector.normalize();
+                missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+            } else {
+                // What to do if no target is found after initial time? 
+                // Either continue forward, slow down, or do nothing.
+                directionVector = new THREE.Vector3(0, 0, 1); // Example: Continue forward.
+                missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+            }
+        }
+
+
     }
 }
 
