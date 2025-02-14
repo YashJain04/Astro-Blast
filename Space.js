@@ -59,7 +59,7 @@ loader.load('models/spaceship.glb', function (gltf) {
     const sphereGeometry = new THREE.ConeGeometry(1, 2, 16);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
     const orangeSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    orangeSphere.position.set(0, 5.5, -10.25);
+    orangeSphere.position.set(0, 15.5, -10.25);
     orangeSphere.rotation.x = -Math.PI / 2;
     rocket.add(orangeSphere);
 
@@ -156,6 +156,7 @@ function createAsteroid() {
 setInterval(createAsteroid, 1000);
 
 camera.position.z = 6;
+const missileFireEffects = {};
 
 document.addEventListener('keydown', (event) => {
     const now = Date.now(); 
@@ -180,6 +181,7 @@ document.addEventListener('keydown', (event) => {
         scene.add(bullet);
         bullets.push({ mesh: bullet, spawnTime: Date.now() }); // Store the spawn time of the bullet and the mesh itself
         console.log('Pew pew');
+        missileFireEffects[bullet.uuid] = new FireEffect(scene);
     }
     if (event.key === 'f'){
         shield.visible = !shield.visible;
@@ -255,7 +257,7 @@ function animateSpaceship(){
     }
 }
 
-const fireEffect = new FireEffect(rocketGroup); //Used for fire particle
+const fireEffectShip = new FireEffect(rocketGroup); //Used for fire particle
 
 // FPS related stuff
 let previousDelta = 0
@@ -273,7 +275,7 @@ function animate(currentDelta) {
 
     animateSpaceship()
     if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
-        fireEffect.animate(rocketGroup.position.z, rocket.position.y);
+        fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
     }
     //console.log(rocket.position.y)
     //console.log(rocketGroup.position)
@@ -344,6 +346,10 @@ function updateHomingMissiles(missiles, targets) {
                 missile.mesh.position.addScaledVector(directionVector, missileSpeed);
             }
         }
+
+        //if (missileFireEffects[missile.mesh.uuid]) {
+        //    missileFireEffects[missile.mesh.uuid].animate(missile.mesh.position.z, missile.mesh.position.y, 0.25);
+        //}
 
 
     }

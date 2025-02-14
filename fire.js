@@ -8,7 +8,7 @@ export class FireEffect {
         this.scene = scene;
         this.particleCount = 200;
         this.fireParticles = [];
-          
+
         // Particle system
         this.particleGeometry = new THREE.BufferGeometry();
         const positions = new Float32Array(this.particleCount * 3);
@@ -20,7 +20,7 @@ export class FireEffect {
         const fireTexture = new THREE.TextureLoader().load('models/fire.jpeg');
         this.particleMaterial = new THREE.PointsMaterial({
             color: 0xffa500,
-            size: 0.05,
+            size: 0.05, // Base size of fire particles
             map: fireTexture,
             transparent: true,
             blending: THREE.AdditiveBlending,
@@ -31,19 +31,26 @@ export class FireEffect {
         this.scene.add(this.particles);
     }
 
-    createFireParticle(origin, locationZ, locationY) {
+    createFireParticle(origin, locationZ, locationY, size) {
         const index = Math.floor(Math.random() * this.particleCount);
         const positionAttribute = this.particleGeometry.getAttribute('position');
-        positionAttribute.setXYZ(index, origin.x, locationY, origin.z);
-        
 
-        const direction = new THREE.Vector3( //direction where the firew ill go
-            (Math.random() - 0.5) * 0.5, // Fire particles move right
-            (Math.random() - 0.5) * 0.5,
-            Math.random() * -1
-        ).normalize().multiplyScalar(0.2);
+        // Adjust particle spawn spread based on size
+        positionAttribute.setXYZ(
+            index,
+            origin.x, // Spread X based on size
+            locationY,  // Spread Y
+            origin.z // Spread Z
+        );
 
-        const lifeTime = 50 + Math.random() * 30;
+        // Direction where the fire will go, scaled by size
+        const direction = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.5 * size, // Fire spreads more with size
+            (Math.random() - 0.5) * 0.5 * size,
+            Math.random() * -1 * size // More aggressive spread
+        ).normalize().multiplyScalar(0.2 * size); // Increased movement with size
+
+        const lifeTime = (50 + Math.random() * 30) * (size * 0.8); // Particles last longer if size is larger
         const colorAttribute = this.particleGeometry.getAttribute('color');
         const startColor = new THREE.Color(0xffa500);
         colorAttribute.setXYZ(index, startColor.r, startColor.g, startColor.b);
@@ -83,21 +90,21 @@ export class FireEffect {
 
     /**
      * Uses the Z location information from rocketGroup and the Y information from rocket to decide where the fire comes from
-     * @param {*} locationZ 
-     * @param {*} locationY 
-     * 
+     * @param {number} locationZ - The Z position of the fire source
+     * @param {number} locationY - The Y position of the fire source
+     * @param {number} size - The scale/spread of the fire effect
      */
-    animate(locationZ, locationY) {
+    animate(locationZ, locationY, size = 1) {
         //console.log(location);
         const coneBaseCenter = new THREE.Vector3(-1, 0, 0); // Fire starts from left, moves right
-        for (let i = 0; i < 5; i++) {
-            this.fireParticles.push(this.createFireParticle(coneBaseCenter, locationZ, locationY));
+        for (let i = 0; i < 5 * size; i++) { // More particles for larger size
+            this.fireParticles.push(this.createFireParticle(coneBaseCenter, locationZ, locationY, size));
         }
         this.updateParticles();
-        this.particles.visible != this.particles.visible;
+        this.particles.visible = true;
     }
 
-    visible(){
+    visible() {
         console.log("visible");
         this.particles.visible = !this.particles.visible;
     }
