@@ -153,7 +153,7 @@ function createAsteroid() {
     });
 }
 
-setInterval(createAsteroid, 2000);
+setInterval(createAsteroid, 1000);
 
 camera.position.z = 6;
 
@@ -201,13 +201,9 @@ let linearAcceleration = [0, 0, 0]
  * the state of the key presses
  */
 function animateSpaceship(){
-
     if (rocket != null){  
-
         const DAMPING_FACTOR = 0.007
         const INERTIA = 0.001
-
-        
 
         //if player is not pressing 'left' or 'right', display idle animation
         if (!arrowKeysState[1] && !arrowKeysState[3]){
@@ -343,9 +339,8 @@ function updateHomingMissiles(missiles, targets) {
                 directionVector.normalize();
                 missile.mesh.position.addScaledVector(directionVector, missileSpeed);
             } else {
-                // What to do if no target is found after initial time? 
-                // Either continue forward, slow down, or do nothing.
-                directionVector = new THREE.Vector3(0, 0, 1); // Example: Continue forward.
+                // What to do if no target is found after initial time? Keep going forward
+                directionVector = new THREE.Vector3(0, 0, 1);
                 missile.mesh.position.addScaledVector(directionVector, missileSpeed);
             }
         }
@@ -355,15 +350,32 @@ function updateHomingMissiles(missiles, targets) {
 }
 
 /**
- * Find's the closest asteroid for the missle to target
- * @param {*} position 
- * @param {*} targets 
- * @returns 
+ * Finds the closest target while prioritizing those with a lower X position.
+ * @param {THREE.Vector3} position - The current missile position.
+ * @param {Array} targets - List of potential targets.
+ * @returns The closest target considering weighted distances.
  */
 function findClosestTarget(position, targets) {
     return targets.reduce((closest, target) => {
-        return position.distanceTo(target.position) < position.distanceTo(closest.position) ? target : closest;
+        let dx = target.position.x - position.x;
+        let dy = target.position.y - position.y;
+        let dz = target.position.z - position.z;
+
+        // Adjust weighting based on X position
+        let xWeight = dx > 0 ? 10 : 0.5; // More weight for negative X, less for positive X
+        let weightedDx = dx * xWeight;
+
+        let weightedDistance = Math.sqrt(weightedDx * weightedDx + dy * dy + dz * dz);
+
+        let closestDx = closest.position.x - position.x;
+        let closestDy = closest.position.y - position.y;
+        let closestDz = closest.position.z - position.z;
+        
+        let closestXWeight = closestDx < 0 ? 1.5 : 0.7;
+        let closestWeightedDx = closestDx * closestXWeight;
+
+        let closestWeightedDistance = Math.sqrt(closestWeightedDx * closestWeightedDx + closestDy * closestDy + closestDz * closestDz);
+
+        return weightedDistance < closestWeightedDistance ? target : closest;
     }, targets[0]);
 }
-
- 
