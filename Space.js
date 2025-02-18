@@ -448,6 +448,20 @@ function createStarField() {
 
 const starField = createStarField();
 
+function animateStars() {
+    const positions = starField.geometry.attributes.position.array;
+
+    for (let i = 0; i < positions.length; i += 3) {
+        positions[i + 1] -= 0.5
+
+        if (positions[i + 1] < -500) {
+            positions[i + 1] = 500;
+        }
+    }
+
+    starField.geometry.attributes.position.needsUpdate = true;
+}
+
 function checkCollisions() {
     asteroids.forEach((asteroid, index) => {
         const distance = rocketGroup.position.distanceTo(asteroid.position);
