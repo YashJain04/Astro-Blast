@@ -266,7 +266,9 @@ function animate(currentDelta) {
     requestAnimationFrame(animate);
 
     // check if the rocket is hit
-    checkCollisions()
+    // checkCollisions()
+
+    // animateStars();
 
     var delta = currentDelta - previousDelta
     // console.log(delta)
@@ -417,7 +419,34 @@ function createNebulaBackground() {
 
     scene.background = videoTexture;
 }
-createNebulaBackground()
+// createNebulaBackground()
+
+function createStarField() {
+    const starCount = 1000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(starCount * 3);
+
+    for (let i = 0; i < starCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 1000;  // X
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 1000;  // Y
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 1000;  // Z
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.PointsMaterial({
+        color: 0xffffff,  // White stars
+        size: 1.5,  // Adjust star size
+        transparent: true
+    });
+
+    const stars = new THREE.Points(geometry, material)
+    scene.add(stars);
+    
+    return stars;
+}
+
+const starField = createStarField();
 
 function checkCollisions() {
     asteroids.forEach((asteroid, index) => {
