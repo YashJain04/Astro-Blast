@@ -197,6 +197,8 @@ let angularAcceleration = 0
 let linearVelocity = [0, 0, 0]
 let linearAcceleration = [0, 0, 0]
 
+const starField = createStarField();
+
 
 
 /**this function animates the spaceship. It will apply the idle/moving animations etc depending on
@@ -268,7 +270,7 @@ function animate(currentDelta) {
     // check if the rocket is hit
     // checkCollisions()
 
-    // animateStars();
+    animateStars();
 
     var delta = currentDelta - previousDelta
     // console.log(delta)
@@ -445,8 +447,6 @@ function createStarField() {
     
     return stars;
 }
-
-const starField = createStarField();
 
 function animateStars() {
     const positions = starField.geometry.attributes.position.array;
