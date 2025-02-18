@@ -1,38 +1,64 @@
 ﻿// imports
-import * as THREE from 'three';
+import * as THREE from 'three'; // three.js
 import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; // gui details
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
 
+// all content and drawings will be organized in a scenegraph
 const scene = new THREE.Scene();
+
+// initialize a camera to look at scene's content and drawings
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+// TODO: set up the camera's position
+camera.position.x = 3;
+camera.position.y = 6;
+camera.position.z = 0;
+
+// initialize a renderer and set a state (size)
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
+
+// add the output of the renderer to the HTML element
 document.body.appendChild(renderer.domElement);
 
+// use ambient lighting for brighter scene
 const ambientLight = new THREE.AmbientLight('white');
+
+// create controls
 const controls = new OrbitControls(camera, renderer.domElement);
+
+// create three.js helpers for axis and grid
 const axesHelper = new THREE.AxesHelper(2);
 const gridhelper = new THREE.GridHelper(50, 50);
 
-// Added vertical grid
+// added vertical grid
 const verticalGrid = new THREE.GridHelper(50, 50);
 verticalGrid.rotation.x = Math.PI / 2; // Rotate 90 degrees to align with the YZ plane
 verticalGrid.position.z = -25; // Move the grid to the back of the scene
 //scene.add(verticalGrid, gridhelper);
 
+// add the controls, axis lines/helper, and the ambient lighting to the scene
 scene.add(controls, axesHelper, ambientLight);
 
-// variables to keep track of rocket
-let rocket, rocketGroup;
-let rocketHealth = 100;
+// variables to keep track of rocket and bullets
+let rocketGroup, rocketHealth, rocket;
+rocketHealth = 100;
 let bulletModel;
 let lastShotTime = 0;
 
+// variables to keep track of missiles/projectiles
 const missileSpeed = 0.25;
 const missileLifetime = 5000; // 5 seconds in milliseconds
 const targetDistanceThreshold = 10; // Minimum distance for missle to target asteroid 
+
+// keep track of all bullets and asteroids
+const bullets = [];
+const asteroids = [];
+
+// variable for all the stars in the background
+const starField = createStarField();
 
 /**
  * keys state
@@ -44,38 +70,55 @@ const targetDistanceThreshold = 10; // Minimum distance for missle to target ast
 let arrowKeysState = [false, false, false, false] 
 initKeypressEventListeners()
 
+// create a group for the rocket and add it to the scene after rotating in Y
 rocketGroup = new THREE.Group()
 rocketGroup.rotateY(-Math.PI/2)
 scene.add(rocketGroup)
 
+// initialize a loader to load models in .glb format
 const loader = new GLTFLoader();
 loader.load('models/spaceship.glb', function (gltf) {
+    // add it to scene
     scene.add(gltf.scene);
     rocket = gltf.scene;
+
+    // add rocket to our rocket group
     rocketGroup.add(rocket)
+
+    // scale the rocket in size
     rocket.scale.set(0.2, 0.2, 0.2);
+
+    // TODO: position the rocket to the center of the scene
+    // rocket.position.x = 5;
+    // rocket.position.y = 0.5;
     rocket.position.y = 0.5;
   
+    // create geometries and materials
     const sphereGeometry = new THREE.ConeGeometry(1, 2, 16);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
     const orangeSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
     orangeSphere.position.set(0, 15.5, -10.25);
     orangeSphere.rotation.x = -Math.PI / 2;
+
+    // add to our rocket
     rocket.add(orangeSphere);
-
-
 }, undefined, function (error) {
+    // in case of error
     console.error(error);
 });
 
 loader.load('models/rocket.glb', function (gltf) {
+    // create bullet model
     bulletModel = gltf.scene;
+
+    // scale the bullet in size
     bulletModel.scale.set(0.05, 0.05, 0.05);
 }, undefined, function (error) {
+    // in case of error
     console.error(error);
 });
 
-// Shield
+// create a shield for our rocket and add it to our group while scaling in size
 const material = new THREE.PointsMaterial({
     color: 0x0050FF, // Orange color
     size: 0.1,       // Adjust point size
@@ -97,9 +140,6 @@ const warp = new THREE.Points(new THREE.IcosahedronGeometry(5, 8), material);
 scene.add(warp);
 warp.scale.set(2, 2, 25);
 warp.rotateY(Math.PI / 2);
-
-const bullets = [];
-const asteroids = [];
 
 function initKeypressEventListeners(){
 
@@ -155,7 +195,7 @@ function createAsteroid() {
 
 setInterval(createAsteroid, 1000);
 
-camera.position.z = 6;
+// camera.position.z = 6; (TODO: We should remove this to make our game centered)
 const missileFireEffects = {};
 
 document.addEventListener('keydown', (event) => {
@@ -190,16 +230,12 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-//angular velocity and acceleration of the spaceship
+// angular velocity and acceleration of the spaceship
 let angularVelocity = 0.01
 let angularAcceleration = 0
 
 let linearVelocity = [0, 0, 0]
 let linearAcceleration = [0, 0, 0]
-
-const starField = createStarField();
-
-
 
 /**this function animates the spaceship. It will apply the idle/moving animations etc depending on
  * the state of the key presses
@@ -306,14 +342,13 @@ function animate(currentDelta) {
     previousDelta = currentDelta;
 }
 
-// Added light to the scene, otherwise stuff was black
+// added light to the scene, otherwise stuff was black
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(5, 5, 5);
 scene.add(directionalLight);
 
 animate(fpsController.getValue()); //60 FPS by default, can be changed on the dat.gui
 initKeyboardControls();
-
 
 /**
  * Function to update homing behavior for multiple missiles
@@ -393,79 +428,111 @@ function findClosestTarget(position, targets) {
     }, targets[0]);
 }
 
+/**
+ * function used to update the health bar on the UI side in case of collision (TODO: or special ability to increase health)
+ */
 function updateHealthBar() {
+    // retrieve the HTML element for the health bar
     const healthBar = document.getElementById('healthBar');
     healthBar.style.width = rocketHealth + '%';
 
+    // if the health bar is 0 or less, end the game
     if (rocketHealth <= 0) {
         healthBar.style.backgroundColor = 'gray';
         console.log("Game Over! Rocket destroyed.")
     }
 }
 
+/**
+ * function used to create the nebula background and add it to the scene from a .gif or .mp4 file
+ */
 function createNebulaBackground() {
+    // retrieve the nebula effect from a .mp4 file
     const video = document.createElement('video');
-    video.src = './models/nebulaEffect.mp4'; // Ensure the correct path to your video file
-    video.loop = true;
-    video.muted = true;
-    video.autoplay = true;
-    video.play();
+    video.src = './models/nebulaEffect.mp4';
+    video.loop = true; // continuously loop video
+    video.muted = true; // mute the .mp4 video
+    video.autoplay = true; // start automatically
+    video.play(); // play the video
 
+    // create a video texture for it
     const videoTexture = new THREE.VideoTexture(video);
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBAFormat;
 
-    // Fix the color issue by setting the encoding to sRGB
+    // ensuring we keep same colouring (TODO: Does not work...)
     videoTexture.encoding = THREE.sRGBEncoding;
 
     scene.background = videoTexture;
 }
-// createNebulaBackground()
 
+/**
+ * function to create 1000 random stars in the background of the game with randomly generated different positions and adds it to the scene
+ * @returns the star field which contains all of our stars
+ */
 function createStarField() {
+    // create a random set of 1000 stars
     const starCount = 1000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(starCount * 3);
 
+    // set the x, y, z positions
     for (let i = 0; i < starCount; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * 1000;  // X
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 1000;  // Y
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 1000;  // Z
+        positions[i * 3] = (Math.random() - 0.5) * 1000;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 1000;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 1000;
     }
 
+    // set the positions
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
+    // create the star material
     const material = new THREE.PointsMaterial({
         color: 0xffffff,  // White stars
-        size: 1.5,  // Adjust star size
+        size: 0.75,  // Adjust star size
         transparent: true
     });
 
+    // create the stars from the geometry and the material
     const stars = new THREE.Points(geometry, material)
-    scene.add(stars);
     
+    // add stars to the scene
+    scene.add(stars);
+
+    // return all of our stars
     return stars;
 }
 
+/**
+ * function to animate our stars so that they are not static and move in the spaceships direction
+ */
 function animateStars() {
     const positions = starField.geometry.attributes.position.array;
 
+    // change stars to go from left-right (can change in other directions as well)
     for (let i = 0; i < positions.length; i += 3) {
-        positions[i + 1] -= 0.5
+        // change value for speed
+        positions[i] -= 2
 
-        if (positions[i + 1] < -500) {
-            positions[i + 1] = 500;
+        // in case stars go out of FOV and screen view, rearrange them
+        if (positions[i] < -500) {
+            positions[i] = 500;
         }
     }
 
     starField.geometry.attributes.position.needsUpdate = true;
 }
 
+/**
+ * function to check for collisions and update health bar
+ */
 function checkCollisions() {
+    // for each asteroid check the distance to the rocket
     asteroids.forEach((asteroid, index) => {
         const distance = rocketGroup.position.distanceTo(asteroid.position);
 
+        // if the asteroid is extremely close to rocket it has been hit
         if (distance < 2) {
             console.log("Rocket has been hit by the asteroid");
 
