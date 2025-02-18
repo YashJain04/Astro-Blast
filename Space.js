@@ -265,6 +265,9 @@ function animate(currentDelta) {
 
     requestAnimationFrame(animate);
 
+    // check if the rocket is hit
+    checkCollisions()
+
     var delta = currentDelta - previousDelta
     // console.log(delta)
     const FPS = fpsController.getValue()
@@ -415,3 +418,20 @@ function createNebulaBackground() {
     scene.background = videoTexture;
 }
 createNebulaBackground()
+
+function checkCollisions() {
+    asteroids.forEach((asteroid, index) => {
+        const distance = rocketGroup.position.distanceTo(asteroid.position);
+
+        if (distance < 2) {
+            console.log("Rocket has been hit by the asteroid");
+
+            rocketHealth -= 10; // reduce the health
+            updateHealthBar() // update the health bar
+
+            // remove the asteroid after the collision
+            scene.remove(asetroid);
+            asteroids.splice(index, 1);
+        }
+    });
+}
