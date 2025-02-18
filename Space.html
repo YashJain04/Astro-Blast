@@ -1,16 +1,17 @@
 ﻿<!DOCTYPE html>
+<html lang="en">
 <html>
 	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>CSI4130 Project</title>
-		<style>
-			body {
-				/* set margin to 0 and overflow to hidden, to go fullscreen */
-				margin: 0;
-				overflow: hidden;
-			}
-		</style>
+		<link rel="stylesheet" href="styles.css">
 	</head>
 	<body>
+		<div id="healthBarContainer">
+			<div id="healthBar"></div>
+		</div>
+		
 		<script type=module src="space.js"></script>
 		<script src="node_modules/three/build/three.core.min.js"></script> 
   		<script src="node_modules/dat.gui/build/dat.gui.min.js"></script> 

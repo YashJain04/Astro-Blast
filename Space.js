@@ -1,9 +1,9 @@
-﻿import * as THREE from 'three';
-import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; 
+﻿// imports
+import * as THREE from 'three';
+import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; // gui details
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { FireEffect } from './fire.js'; // Fire particle
-
+import { FireEffect } from './fire.js'; // fire particles
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -24,15 +24,15 @@ verticalGrid.position.z = -25; // Move the grid to the back of the scene
 
 scene.add(controls, axesHelper, ambientLight);
 
+// variables to keep track of rocket
 let rocket, rocketGroup;
+let rocketHealth = 100;
 let bulletModel;
 let lastShotTime = 0;
 
 const missileSpeed = 0.25;
 const missileLifetime = 5000; // 5 seconds in milliseconds
-const targetDistanceThreshold = 10; // Minimum distance for missle to target asteroid
-
- 
+const targetDistanceThreshold = 10; // Minimum distance for missle to target asteroid 
 
 /**
  * keys state
@@ -386,19 +386,32 @@ function findClosestTarget(position, targets) {
     }, targets[0]);
 }
 
-const video = document.createElement('video');
-video.src = './models/nebulaEffect.mp4'; // Ensure the correct path to your video file
-video.loop = true;
-video.muted = true;
-video.autoplay = true;
-video.play();
+function updateHealthBar() {
+    const healthBar = document.getElementById('healthBar');
+    healthBar.style.width = rocketHealth + '%';
 
-const videoTexture = new THREE.VideoTexture(video);
-videoTexture.minFilter = THREE.LinearFilter;
-videoTexture.magFilter = THREE.LinearFilter;
-videoTexture.format = THREE.RGBAFormat;
+    if (rocketHealth <= 0) {
+        healthBar.style.backgroundColor = 'gray';
+        console.log("Game Over! Rocket destroyed.")
+    }
+}
 
-// Fix the color issue by setting the encoding to sRGB
-videoTexture.encoding = THREE.sRGBEncoding;
+function createNebulaBackground() {
+    const video = document.createElement('video');
+    video.src = './models/nebulaEffect.mp4'; // Ensure the correct path to your video file
+    video.loop = true;
+    video.muted = true;
+    video.autoplay = true;
+    video.play();
 
-scene.background = videoTexture;
+    const videoTexture = new THREE.VideoTexture(video);
+    videoTexture.minFilter = THREE.LinearFilter;
+    videoTexture.magFilter = THREE.LinearFilter;
+    videoTexture.format = THREE.RGBAFormat;
+
+    // Fix the color issue by setting the encoding to sRGB
+    videoTexture.encoding = THREE.sRGBEncoding;
+
+    scene.background = videoTexture;
+}
+createNebulaBackground()
