@@ -385,3 +385,20 @@ function findClosestTarget(position, targets) {
         return weightedDistance < closestWeightedDistance ? target : closest;
     }, targets[0]);
 }
+
+const video = document.createElement('video');
+video.src = './models/nebulaEffect.mp4'; // Ensure the correct path to your video file
+video.loop = true;
+video.muted = true;
+video.autoplay = true;
+video.play();
+
+const videoTexture = new THREE.VideoTexture(video);
+videoTexture.minFilter = THREE.LinearFilter;
+videoTexture.magFilter = THREE.LinearFilter;
+videoTexture.format = THREE.RGBAFormat;
+
+// Fix the color issue by setting the encoding to sRGB
+videoTexture.encoding = THREE.sRGBEncoding;
+
+scene.background = videoTexture;
