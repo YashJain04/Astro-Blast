@@ -35,8 +35,8 @@ const gridhelper = new THREE.GridHelper(50, 50);
 
 // added vertical grid
 const verticalGrid = new THREE.GridHelper(50, 50);
-verticalGrid.rotation.x = Math.PI / 2; // Rotate 90 degrees to align with the YZ plane
-verticalGrid.position.z = -25; // Move the grid to the back of the scene
+verticalGrid.rotation.x = Math.PI / 2; // rotate 90 degrees to align with the YZ plane
+verticalGrid.position.z = -25; // move the grid to the back of the scene
 //scene.add(verticalGrid, gridhelper);
 
 // add the controls, axis lines/helper, and the ambient lighting to the scene
@@ -51,7 +51,7 @@ let lastShotTime = 0;
 // variables to keep track of missiles/projectiles
 const missileSpeed = 0.25;
 const missileLifetime = 5000; // 5 seconds in milliseconds
-const targetDistanceThreshold = 10; // Minimum distance for missle to target asteroid 
+const targetDistanceThreshold = 10; // minimum distance for missle to target asteroid 
 
 // keep track of all bullets and asteroids
 const bullets = [];
