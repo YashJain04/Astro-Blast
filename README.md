@@ -2,11 +2,11 @@
 CSI4130 Space flight project
 
 # Keybinds
-* Up Arrow key to go make speed higher
-* Down Arrow key to make speed slower
-* Left Arrow key to make rotation slower
-* Right arrow key to make rotation higher
-* SpaceBar to fire
+* V to fire bullet
+* SpaceBar to fire rocket
+* Left Arrow to go left
+* Right Arrow to go right
+* F to turn off effects
 
 # Student Number
 * Nicolas Bérubé - 300239551
