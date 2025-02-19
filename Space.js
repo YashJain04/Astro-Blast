@@ -56,6 +56,8 @@ const targetDistanceThreshold = 10; // minimum distance for missle to target ast
 // keep track of all bullets and asteroids
 const bullets = [];
 const asteroids = [];
+const secondaryBullets = [];
+let lastSecondaryShotTimes = 0;
 
 // variable for all the stars in the background
 const starField = createStarField();
@@ -74,6 +76,13 @@ initKeypressEventListeners()
 rocketGroup = new THREE.Group()
 rocketGroup.rotateY(-Math.PI/2)
 scene.add(rocketGroup)
+
+let orangeCone, orangeCone2, orangeCone3;
+
+const shields = [];
+let shieldActive = false;
+let shieldActivationTime = 0;
+setInterval(createShieldPowerUp, 7500);
 
 // initialize a loader to load models in .glb format
 const loader = new GLTFLoader();
@@ -96,12 +105,27 @@ loader.load('models/spaceship.glb', function (gltf) {
     // create geometries and materials
     const sphereGeometry = new THREE.ConeGeometry(1, 2, 16);
     const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
-    const orangeSphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-    orangeSphere.position.set(0, 15.5, -10.25);
-    orangeSphere.rotation.x = -Math.PI / 2;
+    orangeCone = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    orangeCone.position.set(0, 5.4, -10.25);
+    orangeCone.rotation.x = -Math.PI / 2;
 
     // add to our rocket
-    rocket.add(orangeSphere);
+    rocket.add(orangeCone);
+ 
+    orangeCone2 = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    orangeCone2.position.set(-1.5, 3, -10.25);
+    orangeCone2.rotation.x = -Math.PI / 2;
+
+    // add to our rocket
+    rocket.add(orangeCone2);
+  
+    orangeCone3 = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    orangeCone3.position.set(1.5, 3, -10.25);
+    orangeCone3.rotation.x = -Math.PI / 2;
+
+    // add to our rocket
+    rocket.add(orangeCone3);
+
 }, undefined, function (error) {
     // in case of error
     console.error(error);
@@ -120,7 +144,7 @@ loader.load('models/rocket.glb', function (gltf) {
 
 // create a shield for our rocket and add it to our group while scaling in size
 const material = new THREE.PointsMaterial({
-    color: 0x0050FF, // Orange color
+    color: 0x0050FF,
     size: 0.1,       // Adjust point size
     transparent: false,
     opacity: 0.9
@@ -128,6 +152,7 @@ const material = new THREE.PointsMaterial({
 const shield = new THREE.Points(new THREE.IcosahedronGeometry(5, 5), material);
 rocketGroup.add(shield);
 shield.scale.set(0.5, 0.5, 0.75);
+shield.visible = false
 
 // Warp field (could be removed later, its just a placeholder)
 const warpField = new THREE.PointsMaterial({
@@ -136,10 +161,11 @@ const warpField = new THREE.PointsMaterial({
     transparent: false,
     opacity: 0.9
 });
-const warp = new THREE.Points(new THREE.IcosahedronGeometry(5, 8), material);
+const warp = new THREE.Points(new THREE.IcosahedronGeometry(5, 8), warpField);
 scene.add(warp);
 warp.scale.set(2, 2, 25);
 warp.rotateY(Math.PI / 2);
+
 
 function initKeypressEventListeners(){
 
@@ -197,6 +223,7 @@ setInterval(createAsteroid, 1000);
 
 // camera.position.z = 6; (TODO: We should remove this to make our game centered)
 const missileFireEffects = {};
+const fireEffectShip = new FireEffect(rocketGroup); //Used for fire particle
 
 document.addEventListener('keydown', (event) => {
     const now = Date.now(); 
@@ -226,7 +253,25 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'f'){
         shield.visible = !shield.visible;
         warp.visible = !warp.visible; 
-        fireEffect.visible();
+        fireEffectShip.visible();
+    }
+    // Secondary Bullet - Fires when pressing "v"
+    if (event.key === 'v' && settings.ammo > 0 && now - lastSecondaryShotTimes >= 500) {
+        lastSecondaryShotTimes = now;
+        const secondaryBulletGeometry = new THREE.BoxGeometry(0.6, 0.2, 0.2); // Small rectangle
+        const secondaryBulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 }); // Yellow color
+        const secondaryBullet = new THREE.Mesh(secondaryBulletGeometry, secondaryBulletMaterial);
+        
+        secondaryBullet.position.copy(rocketGroup.position);
+        secondaryBullet.position.y = rocket.position.y;
+        secondaryBullet.position.x -= 1.5; 
+        secondaryBullet.position.y += 1.35;
+        secondaryBullet.scale.set(0.5, 0.5, 0.5);
+
+        scene.add(secondaryBullet);
+        secondaryBullets.push(secondaryBullet);
+        console.log('Secondary bullet fired');
+         
     }
 });
 
@@ -295,13 +340,13 @@ function animateSpaceship(){
     }
 }
 
-const fireEffectShip = new FireEffect(rocketGroup); //Used for fire particle
 
 // FPS related stuff
 let previousDelta = 0
 function animate(currentDelta) {
 
     requestAnimationFrame(animate);
+    if (!orangeCone || !orangeCone2 || !orangeCone3) return; // Wait for the spaceship to load
 
     // check if the rocket is hit
     // checkCollisions()
@@ -325,6 +370,9 @@ function animate(currentDelta) {
     //console.log(rocketGroup.position.z);
 
     if(asteroids.length != 0){updateHomingMissiles(bullets, asteroids)}
+    exaustAnimation();
+    secondaryBulletAnimation();
+    updateShieldPowerUp();
 
     asteroids.forEach((asteroid, index) => {
         asteroid.position.x += 0.15; // Move asteroids from left to right
@@ -544,4 +592,103 @@ function checkCollisions() {
             asteroids.splice(index, 1);
         }
     });
+}
+//  * Does animation for the back cone exaust
+//  */
+function exaustAnimation() {
+    const cones = [orangeCone, orangeCone2, orangeCone3];
+
+    cones.forEach((cone, index) => {
+        // Randomly change color to different shades of orange
+        const hue = (20 + Math.sin(Date.now() * 0.003 + index) * 10) % 360; // Hue oscillates between 10-30
+        const slowOrange = new THREE.Color(`hsl(${hue}, 100%, 50%)`);
+        cone.material.color.set(slowOrange);
+
+        // Pulsing effect (scaling up and down)
+        const scale = 1 + 0.075 * Math.sin(Date.now() * 0.005);
+        cone.scale.set(scale, scale, scale);
+    });
+}
+
+/**
+ * Secondary bullet animation
+ */
+function secondaryBulletAnimation(){
+    for (let i = secondaryBullets.length - 1; i >= 0; i--) {
+        secondaryBullets[i].position.x -= 0.15;
+
+        // Remove bullets if they go out of bounds
+        if (secondaryBullets[i].position.x < -30) {
+            scene.remove(secondaryBullets[i]);
+            secondaryBullets.splice(i, 1);
+        }
+    } 
+}
+
+/**
+ * Function to create a shield power-up icon
+ */
+function createShieldPowerUp() {
+    loader.load('models/shieldIcon.glb', function (gltf) {
+        const shieldPowerUp = gltf.scene;
+        
+        shieldPowerUp.position.set(-25, -2, (Math.random()*15)-1); // Spawn randomly along the Z-axis
+        shieldPowerUp.scale.set(4, 4, 4);
+
+        scene.add(shieldPowerUp);
+        shields.push(shieldPowerUp); 
+        shieldPowerUp.rotateY(Math.PI / 2);
+    }, undefined, function (error) {
+        console.error("Error loading shield power-up:", error);
+    });
+}
+
+function updateShieldPowerUp() {
+    shields.forEach((shieldIcon, index) => {
+        shieldIcon.position.x += 0.15; // Move shield icons from left to right
+
+        // Calculate distance between the spaceship and the shield icon
+        const xDistance = rocketGroup.position.x - shieldIcon.position.x;
+        const zDistance = rocketGroup.position.z - shieldIcon.position.z;
+        const distance = Math.sqrt(xDistance * xDistance + zDistance * zDistance);
+
+        console.log(distance);
+        if (distance < 6.5) { // If shield icon is close to the spaceship
+            console.log("Shield collected!");
+
+            if (!shieldActive) {
+                shield.visible = true; // Turn on the shield
+                shieldActive = true;
+                shieldActivationTime = Date.now(); // Start shield timer
+            }
+
+            // Remove shield icon after collecting
+            scene.remove(shieldIcon);
+            shields.splice(index, 1);
+        }
+
+        if (shieldIcon.position.x > 15) { // Remove shield icons when they go off-screen
+            scene.remove(shieldIcon);
+            shields.splice(index, 1);
+        }
+    });
+
+    // Handle shield expiration and color change
+    if (shieldActive) {
+        let elapsed = (Date.now() - shieldActivationTime) / 5000; // Progress from 0 to 1 over 5 seconds
+
+        // Smoothly transition color from blue to yellow
+        let shieldColor = new THREE.Color().lerpColors(
+            new THREE.Color(0x0050FF), // Start (blue)
+            new THREE.Color(0xFFFF00), // End (yellow)
+            elapsed // Interpolation factor (0 to 1)
+        );
+        shield.material.color.set(shieldColor);
+
+        if (elapsed >= 1) { // Turn off shield after 5 seconds
+            shield.visible = false;
+            shieldActive = false;
+            console.log("Shield deactivated.");
+        }
+    }
 }
