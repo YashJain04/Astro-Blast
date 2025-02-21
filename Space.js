@@ -1,6 +1,8 @@
 ﻿// imports
 import * as THREE from 'three'; // three.js
-import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; // gui details
+import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController,
+    showHitboxController
+ } from './guiControls.js'; // gui details
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
@@ -41,6 +43,8 @@ verticalGrid.position.z = -25; // move the grid to the back of the scene
 
 // add the controls, axis lines/helper, and the ambient lighting to the scene
 scene.add(controls, axesHelper, ambientLight);
+
+const hitboxes = []
 
 // variables to keep track of rocket and bullets
 let rocketGroup, rocketHealth, rocket;
@@ -99,6 +103,7 @@ loader.load('models/spaceship.glb', function (gltf) {
     // scale the rocket in size
     rocket.scale.set(0.2, 0.2, 0.2);
     const rocketHitbox = new THREE.BoxHelper(rocket, 'green')
+    hitboxes.push(rocketHitbox)
     rocketGroup.add(rocketHitbox)
 
 
@@ -230,6 +235,7 @@ function createAsteroid() {
         
         const asteroidHitbox = new THREE.BoxHelper(asteroid, 'red')
         singleAsteroidGroup.add(asteroidHitbox)
+        hitboxes.push(asteroidHitbox)
 
         singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
         
@@ -363,54 +369,6 @@ function animateSpaceship(){
 }
 
 
-// FPS related stuff
-let previousDelta = 0
-function animate(currentDelta) {
-
-    requestAnimationFrame(animate);
-    if (!orangeCone || !orangeCone2 || !orangeCone3) return; // Wait for the spaceship to load
-
-    // check if the rocket is hit
-    // checkCollisions()
-
-    animateStars();
-
-    var delta = currentDelta - previousDelta
-    // console.log(delta)
-    const FPS = fpsController.getValue()
-
-    if (FPS && delta < 1000 / FPS) {
-        return;
-    }
-
-    animateSpaceship()
-    if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
-        fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
-    }
-    //console.log(rocket.position.y)
-    //console.log(rocketGroup.position)
-    //console.log(rocketGroup.position.z);
-
-    if(asteroids.length != 0){updateHomingMissiles(bullets, asteroids)}
-    exaustAnimation();
-    secondaryBulletAnimation();
-    updateShieldPowerUp();
-
-    asteroids.forEach((asteroid, index) => {
-        asteroid.position.x += 0.15; // Move asteroids from left to right
-        if (asteroid.position.x > 15) { // Remove asteroid when it goes off-screen
-            scene.remove(asteroid);
-            asteroids.splice(index, 1);
-        }
-    });
-
-    shield.rotation.z += 0.01;
-    warp.rotation.z += 0.015;
-
-    renderer.render(scene, camera);
-
-    previousDelta = currentDelta;
-}
 
 // added light to the scene, otherwise stuff was black
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -714,4 +672,70 @@ function updateShieldPowerUp() {
         }
     }
 }
+
+// FPS related stuff
+let previousDelta = 0
+function animate(currentDelta) {
+
+    if (showHitboxController.getValue()){
+        hitboxes.forEach(hitbox=>{
+            hitbox.visible = true
+        })
+    }
+    else{
+        hitboxes.forEach(hitbox=>{
+            hitbox.visible = false
+        })
+        
+    }
+    
+
+    // console.log()
+    
+
+    requestAnimationFrame(animate);
+    if (!orangeCone || !orangeCone2 || !orangeCone3) return; // Wait for the spaceship to load
+
+    // check if the rocket is hit
+    // checkCollisions()
+
+    animateStars();
+
+    var delta = currentDelta - previousDelta
+    // console.log(delta)
+    const FPS = fpsController.getValue()
+
+    if (FPS && delta < 1000 / FPS) {
+        return;
+    }
+
+    animateSpaceship()
+    if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
+        fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
+    }
+    //console.log(rocket.position.y)
+    //console.log(rocketGroup.position)
+    //console.log(rocketGroup.position.z);
+
+    if(asteroids.length != 0){updateHomingMissiles(bullets, asteroids)}
+    exaustAnimation();
+    secondaryBulletAnimation();
+    updateShieldPowerUp();
+
+    asteroids.forEach((asteroid, index) => {
+        asteroid.position.x += 0.15; // Move asteroids from left to right
+        if (asteroid.position.x > 15) { // Remove asteroid when it goes off-screen
+            scene.remove(asteroid);
+            asteroids.splice(index, 1);
+        }
+    });
+
+    shield.rotation.z += 0.01;
+    warp.rotation.z += 0.015;
+
+    renderer.render(scene, camera);
+
+    previousDelta = currentDelta;
+}
+
 
