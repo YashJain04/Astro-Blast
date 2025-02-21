@@ -78,6 +78,7 @@ rocketGroup.rotateY(-Math.PI/2)
 scene.add(rocketGroup)
 
 let orangeCone, orangeCone2, orangeCone3;
+let AmmoJS = 0
 
 const shields = [];
 let shieldActive = false;
@@ -91,11 +92,15 @@ loader.load('models/spaceship.glb', function (gltf) {
     scene.add(gltf.scene);
     rocket = gltf.scene;
 
+    
     // add rocket to our rocket group
     rocketGroup.add(rocket)
 
     // scale the rocket in size
     rocket.scale.set(0.2, 0.2, 0.2);
+    const rocketHitbox = new THREE.BoxHelper(rocket, 'green')
+    rocketGroup.add(rocketHitbox)
+
 
     // TODO: position the rocket to the center of the scene
     // rocket.position.x = 5;
@@ -166,6 +171,13 @@ scene.add(warp);
 warp.scale.set(2, 2, 25);
 warp.rotateY(Math.PI / 2);
 
+/**initialises AmmoJS library */
+function initAmmoJS(){
+    Ammo().then(ammo=>{
+        AmmoJS = ammo 
+    })
+
+}
 
 function initKeypressEventListeners(){
 
@@ -209,11 +221,21 @@ function createAsteroid() {
     const randomlyChosenAsteroidModel = Math.floor(Math.random() * numAsteroidModels) + 1;
     
     loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
-        scene.add(gltf.scene);
+
+        const singleAsteroidGroup = new THREE.Group() //THREE.Group used to store a single asteroid
+        scene.add(singleAsteroidGroup)
+
         const asteroid = gltf.scene;
-        asteroid.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
-        scene.add(asteroid);
-        asteroids.push(asteroid);
+        singleAsteroidGroup.add(asteroid)
+        
+        const asteroidHitbox = new THREE.BoxHelper(asteroid, 'red')
+        singleAsteroidGroup.add(asteroidHitbox)
+
+        singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
+        
+        asteroids.push(singleAsteroidGroup);
+        
+
     }, undefined, function (error) {
         console.error(error);
     });
@@ -652,7 +674,7 @@ function updateShieldPowerUp() {
         const zDistance = rocketGroup.position.z - shieldIcon.position.z;
         const distance = Math.sqrt(xDistance * xDistance + zDistance * zDistance);
 
-        console.log(distance);
+        // console.log(distance);
         if (distance < 6.5) { // If shield icon is close to the spaceship
             console.log("Shield collected!");
 
@@ -692,3 +714,4 @@ function updateShieldPowerUp() {
         }
     }
 }
+

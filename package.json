@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "ammojs3": "^0.0.11",
     "dat.gui": "^0.7.9",
     "three": "^0.173.0"
   },
