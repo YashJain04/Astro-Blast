@@ -228,6 +228,7 @@ function createAsteroid() {
     loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
 
         const singleAsteroidGroup = new THREE.Group() //THREE.Group used to store a single asteroid
+        singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
         scene.add(singleAsteroidGroup)
 
         const asteroid = gltf.scene;
@@ -237,7 +238,7 @@ function createAsteroid() {
         singleAsteroidGroup.add(asteroidHitbox)
         hitboxes.push(asteroidHitbox)
 
-        singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
+        
         
         asteroids.push(singleAsteroidGroup);
         
@@ -461,6 +462,7 @@ function findClosestTarget(position, targets) {
  */
 function updateHealthBar() {
     // retrieve the HTML element for the health bar
+    rocketHealth -= 5
     const healthBar = document.getElementById('healthBar');
     healthBar.style.width = rocketHealth + '%';
 
@@ -554,27 +556,29 @@ function animateStars() {
 
 /**
  * function to check for collisions and update health bar
+ * OLD FUNCTION, NEW FUNCTION HAS BEEN DEFINED BELOW
  */
-function checkCollisions() {
-    // for each asteroid check the distance to the rocket
-    asteroids.forEach((asteroid, index) => {
-        const distance = rocketGroup.position.distanceTo(asteroid.position);
+// function checkCollisions() {
+//     // for each asteroid check the distance to the rocket
+//     asteroids.forEach((asteroid, index) => {
+//         const distance = rocketGroup.position.distanceTo(asteroid.position);
 
-        // if the asteroid is extremely close to rocket it has been hit
-        if (distance < 2) {
-            console.log("Rocket has been hit by the asteroid");
+//         // if the asteroid is extremely close to rocket it has been hit
+//         if (distance < 2) {
+//             console.log("Rocket has been hit by the asteroid");
 
-            rocketHealth -= 10; // reduce the health
-            updateHealthBar() // update the health bar
+//             rocketHealth -= 10; // reduce the health
+//             updateHealthBar() // update the health bar
 
-            // remove the asteroid after the collision
-            scene.remove(asetroid);
-            asteroids.splice(index, 1);
-        }
-    });
-}
+//             // remove the asteroid after the collision
+//             scene.remove(asetroid);
+//             asteroids.splice(index, 1);
+//         }
+//     });
+// }
 //  * Does animation for the back cone exaust
 //  */
+
 function exaustAnimation() {
     const cones = [orangeCone, orangeCone2, orangeCone3];
 
@@ -681,9 +685,10 @@ function checkForAsteroidCollision(){
 
         asteroids.forEach(asteroidGroup=>{
             if (asteroidGroup.children[1]){
-                const asteroidHitbox = new THREE.Box3().setFromObject(asteroidGroup.children[1]) 
+                const asteroidHitbox = new THREE.Box3().setFromObject(asteroidGroup) 
                 if (rocketHitbox.intersectsBox(asteroidHitbox)){
-                    console.log('collision')
+                    // console.log(asteroidGroup.children[0].children[0].position)
+                    handleCollision(asteroidGroup)
                 }
             }      
         })
@@ -692,9 +697,20 @@ function checkForAsteroidCollision(){
 
 }
 
-// FPS related stuff
-let previousDelta = 0
-function animate(currentDelta) {
+/**called when a collision between an asteroid and the rocket has been detected */
+function handleCollision(asteroidGroup){
+    asteroidGroup.children.forEach(child=>{
+        asteroidGroup.remove(child)
+    })
+    // console.log(asteroidGroup.children)
+    asteroids.filter(a=>a==asteroidGroup)
+    scene.remove(asteroidGroup)
+    updateHealthBar()
+}
+
+    // FPS related stuff
+    let previousDelta = 0
+    function animate(currentDelta) {
 
     if (showHitboxController.getValue()){
         hitboxes.forEach(hitbox=>{
