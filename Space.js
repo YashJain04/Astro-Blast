@@ -103,8 +103,12 @@ loader.load('models/spaceship.glb', function (gltf) {
     // scale the rocket in size
     rocket.scale.set(0.2, 0.2, 0.2);
     const rocketHitbox = new THREE.BoxHelper(rocket, 'green')
+    // rocketHitbox.scale.set(0.9, 1.2, 0.8)
+    rocketHitbox.scale.set(0.1, 0.1, 0.1)
+    rocketHitbox.update()
     hitboxes.push(rocketHitbox)
     rocketGroup.add(rocketHitbox)
+   
 
 
     // TODO: position the rocket to the center of the scene
@@ -462,7 +466,7 @@ function findClosestTarget(position, targets) {
  */
 function updateHealthBar() {
     // retrieve the HTML element for the health bar
-    rocketHealth -= 5
+    rocketHealth -= 10
     const healthBar = document.getElementById('healthBar');
     healthBar.style.width = rocketHealth + '%';
 
