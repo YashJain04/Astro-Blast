@@ -672,6 +672,25 @@ function updateShieldPowerUp() {
         }
     }
 }
+/**function used to check if the hitbox of an asteroid collides with the hitbox of the spaceship */
+function checkForAsteroidCollision(){
+    
+
+    if (rocketGroup.children[3]){
+        const rocketHitbox = new THREE.Box3().setFromObject(rocketGroup.children[3]) 
+
+        asteroids.forEach(asteroidGroup=>{
+            if (asteroidGroup.children[1]){
+                const asteroidHitbox = new THREE.Box3().setFromObject(asteroidGroup.children[1]) 
+                if (rocketHitbox.intersectsBox(asteroidHitbox)){
+                    console.log('collision')
+                }
+            }      
+        })
+    }
+    
+
+}
 
 // FPS related stuff
 let previousDelta = 0
@@ -688,6 +707,8 @@ function animate(currentDelta) {
         })
         
     }
+
+    checkForAsteroidCollision()
     
 
     // console.log()
