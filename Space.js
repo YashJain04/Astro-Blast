@@ -174,7 +174,10 @@ function createAsteroid() {
 
 setInterval(createAsteroid, 1000);
 
-camera.position.z = 6;
+camera.position.x = 6;
+camera.position.y = 4;
+camera.rotateY(Math.PI / 2);
+camera.rotateX(-0.3);
 const missileFireEffects = {};
 const fireEffectShip = new FireEffect(rocketGroup); //Used for fire particle
 
@@ -281,6 +284,7 @@ function animateSpaceship(){
                     rocket.rotation.z = -1 * rotationAngleCap
                 }
                 rocketGroup.position.z += 0.05
+                
             }
 
             //player is pressing right key
