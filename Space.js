@@ -1,5 +1,5 @@
 ﻿import * as THREE from 'three';
-import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController } from './guiControls.js'; 
+import { initKeyboardControls, heightController, lengthController, fpsController, debugCamController, settings, ammoController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { FireEffect } from './fire.js'; // Fire particle
@@ -12,17 +12,31 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 const ambientLight = new THREE.AmbientLight('white');
-const controls = new OrbitControls(camera, renderer.domElement);
+scene.add(ambientLight);
+
+// only display axes and let the user move the camera if in debug mode (off by default)
 const axesHelper = new THREE.AxesHelper(2);
 const gridhelper = new THREE.GridHelper(50, 50);
+let controls;
+debugCamController.onChange((value) => {
+    if(controls == null)
+        controls = new OrbitControls(camera, renderer.domElement);
+
+    controls.enableDamping = value;
+    controls.enablePan = value;
+    controls.enableRotate = value;
+
+    if(value)
+        scene.add(axesHelper);
+    else
+        scene.remove(axesHelper);
+});
 
 // Added vertical grid
 const verticalGrid = new THREE.GridHelper(50, 50);
 verticalGrid.rotation.x = Math.PI / 2; // Rotate 90 degrees to align with the YZ plane
 verticalGrid.position.z = -25; // Move the grid to the back of the scene
 //scene.add(verticalGrid, gridhelper);
-
-scene.add(controls, axesHelper, ambientLight);
 
 let rocket, rocketGroup;
 let bulletModel;
