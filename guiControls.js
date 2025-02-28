@@ -64,10 +64,14 @@ export function initKeyboardControls() {
           settings.height = Math.max(-3, settings.height - 0.1);
           heightController.updateDisplay();
           break;
+        case 'D':
+        case 'd':
         case 'ArrowRight':
           settings.length = Math.min(7, settings.length + 0.1);
           lengthController.updateDisplay();
           break;
+        case 'A':
+        case 'a':
         case 'ArrowLeft':
           settings.length = Math.max(-7, settings.length - 0.1);
           lengthController.updateDisplay();

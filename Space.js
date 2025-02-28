@@ -140,13 +140,13 @@ function initKeypressEventListeners(){
         if (event.key == 'ArrowUp') {
             arrowKeysState[0] = true;
         }
-        if (event.key == 'ArrowRight') {
+        if (event.key == 'ArrowRight' || event.key == 'D' || event.key == 'd') {
             arrowKeysState[1] = true;
         }
         if (event.key == 'ArrowDown') {
             arrowKeysState[2] = true;
         }
-        if (event.key == 'ArrowLeft') {
+        if (event.key == 'ArrowLeft' || event.key == "A" || event.key == 'a') {
             arrowKeysState[3] = true;
         } 
     }
@@ -155,13 +155,13 @@ function initKeypressEventListeners(){
         if (event.key == 'ArrowUp') {
             arrowKeysState[0] = false;
         }
-        if (event.key == 'ArrowRight') {
+        if (event.key == 'ArrowRight' || event.key == 'D' || event.key == 'd') {
             arrowKeysState[1] = false;
         }
         if (event.key == 'ArrowDown') {
             arrowKeysState[2] = false;
         }
-        if (event.key == 'ArrowLeft') {
+        if (event.key == 'ArrowLeft' || event.key == "A" || event.key == 'a') {
             arrowKeysState[3] = false;
         } 
     }
