@@ -277,7 +277,7 @@ function animateSpaceship(){
             }
 
             //player is pressing left key
-            if (arrowKeysState[3]){
+            if (arrowKeysState[3] && rocketGroup.position.z <= 6){
                 rocketGroup.position.z += 0.05
                 rocket.rotateZ(-0.01)
                 if (rocket.rotation.z <=  -1 * rotationAngleCap){
@@ -288,7 +288,7 @@ function animateSpaceship(){
             }
 
             //player is pressing right key
-            else if (arrowKeysState[1]){
+            else if (arrowKeysState[1] && rocketGroup.position.z >= -6){
                 rocketGroup.position.z -= 0.05
                 rocket.rotateZ(0.01)
                 if (rocket.rotation.z >= rotationAngleCap){
