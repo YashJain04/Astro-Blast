@@ -131,6 +131,7 @@ warp.rotateY(Math.PI / 2);
 
 const bullets = [];
 const asteroids = [];
+const explosions = [];
 const secondaryBullets = [];
 let lastSecondaryShotTimes = 0;
 
@@ -187,6 +188,21 @@ function createAsteroid() {
 }
 
 setInterval(createAsteroid, 1000);
+
+function createExplosion(position) {
+    const material = new THREE.PointsMaterial({
+        color: 0xEEEEEE,
+        size: 0.1,
+        transparent: false,
+        opacity: 1.0
+    });
+    const explosion = new THREE.Points(new THREE.SphereGeometry(5), material);
+    explosion.geometry.scale(0.01, 0.01, 0.01);
+    explosion.position.set(position.x, position.y, position.z);
+
+    explosions.push(explosion);
+    scene.add(explosion);
+}
 
 camera.position.x = 6;
 camera.position.y = 4;
@@ -350,6 +366,16 @@ function animate(currentDelta) {
         }
     });
 
+    explosions.forEach((explosion, index) => {
+        explosion.geometry.scale(1.4, 1.4, 1.4);
+        explosion.material.opacity -= 0.3;
+
+        if(explosion.material.opacity == 0) {
+            scene.remove(explosion);
+            explosions.splice(index, 1);
+        }
+    });
+
     shield.rotation.z += 0.01;
     warp.rotation.z += 0.015;
 
@@ -396,9 +422,18 @@ function updateHomingMissiles(missiles, targets) {
             // Homing behavior
             let closestTarget = findClosestTarget(missile.mesh.position, targets);
             if (closestTarget) { // Check if a target was found
-                directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
-                directionVector.normalize();
-                missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+                // If the missile has collided with the target, remove it
+                if(closestTarget.position.distanceTo(missile.mesh.position) < 0.1) {
+                    scene.remove(closestTarget);
+                    scene.remove(missile.mesh);
+                    missiles.splice(i, 1);
+                    createExplosion(closestTarget.position);
+                // Go closer to the target
+                } else {
+                    directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
+                    directionVector.normalize();
+                    missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+                }
             } else {
                 // What to do if no target is found after initial time? Keep going forward
                 directionVector = new THREE.Vector3(0, 0, 1);
