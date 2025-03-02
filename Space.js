@@ -505,6 +505,17 @@ function secondaryBulletAnimation(){
     for (let i = secondaryBullets.length - 1; i >= 0; i--) {
         secondaryBullets[i].position.x -= 0.15;
 
+        if(asteroids.length > 0){
+            let closestTarget = findClosestTarget(secondaryBullets[i].position, asteroids);
+            // If the bullet has collided with the target, remove it
+            if(closestTarget.position.distanceTo(secondaryBullets[i].position) < 0.5) {
+                scene.remove(closestTarget);
+                scene.remove(secondaryBullets[i]);
+                secondaryBullets.splice(i, 1);
+                createExplosion(closestTarget.position);
+            }
+        }
+
         // Remove bullets if they go out of bounds
         if (secondaryBullets[i].position.x < -30) {
             scene.remove(secondaryBullets[i]);
