@@ -12,6 +12,7 @@ export const settings = {
 
 // Initialize the GUI
 export const gui = new dat.GUI();
+gui.close();
 
 // Add controllers for the parameters
 export const heightController = gui.add(settings, 'height', -3, 3);
