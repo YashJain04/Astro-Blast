@@ -19,5 +19,8 @@ body {
 #healthBar {
     width: 100%;
     height: 100%;
-    background-color: red;
+    background: linear-gradient(to right, red, orange, yellow, green);
+    border-radius: 5px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5); /* Optional: shadow for depth */
+    pointer-events: auto; /* Enable interaction if needed */
 }
