@@ -7,7 +7,8 @@ export const settings = {
   length: 1.0,
   ammo: 100,
   FPS: 60,
-  debug_cam: false
+  debug_cam: false,
+  showHitbox: true
 };
 
 // Initialize the GUI
@@ -19,6 +20,7 @@ export const heightController = gui.add(settings, 'height', -3, 3);
 export const lengthController = gui.add(settings, 'length', -7, 7);
 export const fpsController = gui.add(settings, 'FPS', 1, 165);
 export const debugCamController = gui.add(settings, "debug_cam");
+export const showHitboxController = gui.add(settings, 'showHitbox');
 
 const heightInput = heightController.domElement.querySelector('input');
 heightInput.disabled = true;
