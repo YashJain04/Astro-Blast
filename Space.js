@@ -188,7 +188,7 @@ function startGame() {
     // regeneration health power up management
     const regenerations = [];
     let regenStatus = false;
-    setInterval(createRegenerationHealthPowerUp, 10500);
+    setInterval(createRegenerationHealthPowerUp, 15500);
 
     // initialize a loader to load models in .glb format
     const loader = new GLTFLoader();
