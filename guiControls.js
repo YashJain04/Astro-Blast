@@ -7,7 +7,7 @@ export const settings = {
   length: 1.0,
   ammo: 100,
   FPS: 60,
-  showHitbox: true
+  debug_cam: false
 };
 
 // Initialize the GUI
@@ -18,7 +18,7 @@ gui.close();
 export const heightController = gui.add(settings, 'height', -3, 3);
 export const lengthController = gui.add(settings, 'length', -7, 7);
 export const fpsController = gui.add(settings, 'FPS', 1, 165);
-export const showHitboxController = gui.add(settings, 'showHitbox');
+export const debugCamController = gui.add(settings, "debug_cam");
 
 const heightInput = heightController.domElement.querySelector('input');
 heightInput.disabled = true;
@@ -66,10 +66,14 @@ export function initKeyboardControls() {
           settings.height = Math.max(-3, settings.height - 0.1);
           heightController.updateDisplay();
           break;
+        case 'D':
+        case 'd':
         case 'ArrowRight':
           settings.length = Math.min(7, settings.length + 0.1);
           lengthController.updateDisplay();
           break;
+        case 'A':
+        case 'a':
         case 'ArrowLeft':
           settings.length = Math.max(-7, settings.length - 0.1);
           lengthController.updateDisplay();

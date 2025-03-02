@@ -1,6 +1,5 @@
-﻿// imports
-import * as THREE from 'three'; // three.js
-import { initKeyboardControls, heightController, lengthController, fpsController, settings, ammoController, showHitboxController } from './guiControls.js'; // gui details
+import * as THREE from 'three';
+import { initKeyboardControls, heightController, lengthController, fpsController, debugCamController, settings, ammoController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
@@ -107,13 +106,27 @@ function startGame() {
 
     // use ambient lighting for brighter scene
     const ambientLight = new THREE.AmbientLight('white');
-
-    // create controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-
-    // create three.js helpers for axis and grid
+    scene.add(ambientLight);
+    
+    // only display axes and let the user move the camera if in debug mode (off by default)
     const axesHelper = new THREE.AxesHelper(2);
     const gridhelper = new THREE.GridHelper(50, 50);
+    
+    // create controls
+    let controls;
+    debugCamController.onChange((value) => {
+        if(controls == null)
+            controls = new OrbitControls(camera, renderer.domElement);
+    
+        controls.enableDamping = value;
+        controls.enablePan = value;
+        controls.enableRotate = value;
+    
+        if(value)
+            scene.add(axesHelper);
+        else
+            scene.remove(axesHelper);
+    });
 
     // added vertical grid
     const verticalGrid = new THREE.GridHelper(50, 50);
@@ -141,6 +154,7 @@ function startGame() {
     // keep track of all bullets and asteroids
     const bullets = [];
     const asteroids = [];
+    const explosions = [];
     const secondaryBullets = [];
     let lastSecondaryShotTimes = 0;
 
@@ -286,13 +300,13 @@ function startGame() {
             if (event.key == 'ArrowUp') {
                 arrowKeysState[0] = true;
             }
-            if (event.key == 'ArrowRight') {
+            if (event.key == 'ArrowRight' || event.key == 'D' || event.key == 'd') {
                 arrowKeysState[1] = true;
             }
             if (event.key == 'ArrowDown') {
                 arrowKeysState[2] = true;
             }
-            if (event.key == 'ArrowLeft') {
+            if (event.key == 'ArrowLeft' || event.key == "A" || event.key == 'a') {
                 arrowKeysState[3] = true;
             } 
         }
@@ -301,13 +315,13 @@ function startGame() {
             if (event.key == 'ArrowUp') {
                 arrowKeysState[0] = false;
             }
-            if (event.key == 'ArrowRight') {
+            if (event.key == 'ArrowRight' || event.key == 'D' || event.key == 'd') {
                 arrowKeysState[1] = false;
             }
             if (event.key == 'ArrowDown') {
                 arrowKeysState[2] = false;
             }
-            if (event.key == 'ArrowLeft') {
+            if (event.key == 'ArrowLeft' || event.key == "A" || event.key == 'a') {
                 arrowKeysState[3] = false;
             } 
         }
@@ -334,6 +348,7 @@ function startGame() {
             }
 
             const asteroid = gltf.scene;
+            asteroid.position.set(-40, 1, Math.random() * 14 - 7);
             singleAsteroidGroup.add(asteroid)
             
             const asteroidHitbox = new THREE.BoxHelper(asteroid, 'red')
@@ -352,6 +367,26 @@ function startGame() {
 
     // call this function thus creating asteroids every second
     setInterval(createAsteroid, 1000);
+
+    function createExplosion(position) {
+        const material = new THREE.PointsMaterial({
+            color: 0xEEEEEE,
+            size: 0.1,
+            transparent: false,
+            opacity: 1.0
+        });
+        const explosion = new THREE.Points(new THREE.SphereGeometry(5), material);
+        explosion.geometry.scale(0.01, 0.01, 0.01);
+        explosion.position.set(position.x, position.y, position.z);
+    
+        explosions.push(explosion);
+        scene.add(explosion);
+    }
+    
+    camera.position.x = 6;
+    camera.position.y = 4;
+    camera.rotateY(Math.PI / 2);
+    camera.rotateX(-0.3);
 
     const missileFireEffects = {};
     const fireEffectShip = new FireEffect(rocketGroup); // used for fire particle
@@ -451,7 +486,7 @@ function startGame() {
                 }
 
                 //player is pressing left key
-                if (arrowKeysState[3]){
+                if (arrowKeysState[3] && rocketGroup.position.z <= 6){
                     rocketGroup.position.z += 0.05
                     rocket.rotateZ(-0.01)
                     if (rocket.rotation.z <=  -1 * rotationAngleCap){
@@ -461,7 +496,7 @@ function startGame() {
                 }
 
                 //player is pressing right key
-                else if (arrowKeysState[1]){
+                else if (arrowKeysState[1] && rocketGroup.position.z >= -6){
                     rocketGroup.position.z -= 0.05
                     rocket.rotateZ(0.01)
                     if (rocket.rotation.z >= rotationAngleCap){
