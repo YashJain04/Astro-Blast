@@ -748,6 +748,8 @@ function startGame() {
         createPlanetsAndMoon();
         // TODO:
         // createVolumetricNebula();
+        // createGlowingCometWithTail();
+        // createMeteorShower();
     }
 
     /**
@@ -990,6 +992,21 @@ function startGame() {
      * create volumetric nebula...
      */
     function createVolumetricNebula() {
+    }
+
+    /**
+     * TODO:
+     * create a glowing comet with a tail and streak
+     */
+    function createGlowingCometWithTail() {
+    }
+
+    /**
+     * TODO:
+     * create a meteor shower
+     */
+    function createMeteorShower() {
+        
     }
 
     /**
