@@ -1187,10 +1187,13 @@ function startGame() {
             // calculate the distance
             const xDistance = rocketGroup.position.x - regenerationIcon.position.x;
             const zDistance = rocketGroup.position.z - regenerationIcon.position.z;
-            const distance = Math.sqrt(xDistance * xDistance + zDistance * zDistance);
 
             // check if spaceship is close to health regeneration icon
-            if (distance < 6.5) {
+            if (xDistance < 0.1 && zDistance < -2) {
+                console.log("Debug Values...")
+                console.log(xDistance);
+                console.log(zDistance);
+
                 console.log("Regeneration Health Icon Collected");
 
                 // reset the health back to 100
@@ -1288,7 +1291,12 @@ function startGame() {
 
             // console.log(distance);
             // TODO: Fix the distance...
-            if (distance < 6.5) { // If shield icon is close to the spaceship (6.5)
+            // original condition was ========= distance < 6.5
+            if (xDistance < 0.1 && zDistance < -2) { // If shield icon is close to the spaceship
+                console.log("Debug Values...")
+                console.log(xDistance);
+                console.log(zDistance);
+
                 console.log("Shield collected!");
 
                 if (!shieldActive) {
