@@ -45,7 +45,8 @@ if (!gameStatus) {
     startButton.style.padding = '10px 20px';
     startButton.style.background = 'red';
     startButton.style.color = 'white';
-    startButton.style.border = 'none';
+    startButton.style.border = 'solid 3.5px';
+    startButton.style.borderColor = 'black';
     startButton.style.cursor = 'pointer';
     startButton.style.textShadow = '2px 2px 4px black';
     
