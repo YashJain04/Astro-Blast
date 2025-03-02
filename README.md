@@ -18,8 +18,8 @@ The user is required to [navigate](#game-controls-️) the spaceship and destroy
 # Game Controls 🕹️🎮
 * V = To Fire Bullets
 * SpaceBar = To Fire Rockets
-* Left Arrow/A - Navigate Left
-* Right Arrow/D - Navigate Right
+* Left Arrow/A = Navigate Left
+* Right Arrow/D = Navigate Right
 * F = Turn Off Effects
 
 # Student Information 📚📝
