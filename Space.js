@@ -540,14 +540,30 @@ function startGame() {
                 directionVector = new THREE.Vector3(-1, 0, 0); 
                 missile.mesh.position.addScaledVector(directionVector, missileSpeed);
 
-            } else {
+            }
+            
+            else {
                 // Homing behavior
                 let closestTarget = findClosestTarget(missile.mesh.position, targets);
                 if (closestTarget) { // Check if a target was found
-                    directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
-                    directionVector.normalize();
-                    missile.mesh.position.addScaledVector(directionVector, missileSpeed);
-                } else {
+                
+                    // If the missile has collided with the target, remove it
+                    if(closestTarget.position.distanceTo(missile.mesh.position) < 0.1) {
+                        scene.remove(closestTarget);
+                        scene.remove(missile.mesh);
+                        missiles.splice(i, 1);
+                        createExplosion(closestTarget.position);
+                        // Go closer to the target
+                    }
+                    
+                    else {
+                        directionVector = new THREE.Vector3().subVectors(closestTarget.position, missile.mesh.position);
+                        directionVector.normalize();
+                        missile.mesh.position.addScaledVector(directionVector, missileSpeed);
+                    }
+                }
+                
+                else {
                     // What to do if no target is found after initial time? Keep going forward
                     directionVector = new THREE.Vector3(0, 0, 1);
                     missile.mesh.position.addScaledVector(directionVector, missileSpeed);
@@ -1137,6 +1153,18 @@ function startGame() {
         for (let i = secondaryBullets.length - 1; i >= 0; i--) {
             secondaryBullets[i].position.x -= 0.15;
 
+            // if there are asteroids
+            if (asteroids.length > 0){
+                let closestTarget = findClosestTarget(secondaryBullets[i].position, asteroids);
+                // If the bullet has collided with the target, remove it
+                if(closestTarget.position.distanceTo(secondaryBullets[i].position) < 0.5) {
+                    scene.remove(closestTarget);
+                    scene.remove(secondaryBullets[i]);
+                    secondaryBullets.splice(i, 1);
+                    createExplosion(closestTarget.position);
+                }
+            }
+
             // Remove bullets if they go out of bounds
             if (secondaryBullets[i].position.x < -30) {
                 scene.remove(secondaryBullets[i]);
@@ -1311,6 +1339,16 @@ function startGame() {
             if (asteroid.position.x > 15) { // Remove asteroid when it goes off-screen
                 scene.remove(asteroid);
                 asteroids.splice(index, 1);
+            }
+        });
+
+        explosions.forEach((explosion, index) => {
+            explosion.geometry.scale(1.4, 1.4, 1.4);
+            explosion.material.opacity -= 0.3;
+    
+            if(explosion.material.opacity == 0) {
+                scene.remove(explosion);
+                explosions.splice(index, 1);
             }
         });
 
