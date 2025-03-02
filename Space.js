@@ -179,7 +179,7 @@ function createAsteroid() {
     loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
         scene.add(gltf.scene);
         const asteroid = gltf.scene;
-        asteroid.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
+        asteroid.position.set(-40, 1, Math.random() * 14 - 7); // Start from the left side with random Z position
         scene.add(asteroid);
         asteroids.push(asteroid);
     }, undefined, function (error) {
