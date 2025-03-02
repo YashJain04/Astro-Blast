@@ -179,10 +179,16 @@ function startGame() {
     let orangeCone, orangeCone2, orangeCone3;
     let AmmoJS = 0
 
+    // shield power up management
     const shields = [];
     let shieldActive = false;
     let shieldActivationTime = 0;
-    setInterval(createShieldPowerUp, 7500);
+    setInterval(createShieldPowerUp, 6500);
+
+    // regeneration health power up management
+    const regenerations = [];
+    let regenStatus = false;
+    setInterval(createRegenerationHealthPowerUp, 10500);
 
     // initialize a loader to load models in .glb format
     const loader = new GLTFLoader();
@@ -619,6 +625,7 @@ function startGame() {
 
         // if the spaceship actually collided with an asteroid this will execute
         if (collisionStatus && !shield.visible) {
+            console.log("Ship has collided!. Time to deduct health.")
             const healthBar = document.getElementById('healthBar');
             
             // Update the health bar’s width based on the current health
@@ -626,8 +633,16 @@ function startGame() {
             healthBar.style.width = rocketHealth + '%';
         }
 
+        // the regeneration health icon was hit thus execute this code
+        else if (!collisionStatus && regenStatus) {
+            regenStatus = false;
+            console.log("We are resetting the health to 100.");
+            healthBar.style.width = rocketHealth + '%';
+        }
+
         // if the spaceship hit a shield icon...solidify the health bar to look like rock
-        if (!collisionStatus && shield.visible) {
+        else if (!collisionStatus && shield.visible) {
+            console.log("The spaceship is shielded, so solidify the health bar.");
             const healthBar = document.getElementById('healthBar');
             
             // give the health bar a rock-like appearance
@@ -641,6 +656,7 @@ function startGame() {
 
         // else if the spaceship is not currently shielded and not in collision with anything
         else if (!collisionStatus && !shield.visible) {
+            console.log("The spaceship is in it's regular state (no collision or powerups) thus display the health bar as normal.");
             const healthBar = document.getElementById('healthBar');
         
             // apply the gradient background
@@ -667,7 +683,6 @@ function startGame() {
             healthBar.style.boxShadow = 'inset 0 0 5px rgba(0, 0, 0, 0.5);';
             healthBar.style.pointerEvents = 'auto';
         }
-        
 
         // if the health bar is 0 or less, end the game
         if (rocketHealth <= 0) {
@@ -1147,15 +1162,15 @@ function startGame() {
      * function to create the regeneration health icon
      */
     function createRegenerationHealthPowerUp() {
-        loader.load('models/shieldIcon.glb', function (gltf) {
-            const shieldPowerUp = gltf.scene;
+        loader.load('models/heart.glb', function (gltf) {
+            const regenerateHealthPowerUp = gltf.scene;
             
-            shieldPowerUp.position.set(-25, -2, (Math.random()*15)-1); // Spawn randomly along the Z-axis
-            shieldPowerUp.scale.set(4, 4, 4);
+            // spawn randomly along the z axis
+            regenerateHealthPowerUp.position.set(-25, -2, (Math.random())-1);
+            regenerateHealthPowerUp.scale.set(0.25, 0.25, 0.25);
 
-            scene.add(shieldPowerUp);
-            shields.push(shieldPowerUp); 
-            shieldPowerUp.rotateY(Math.PI / 2);
+            scene.add(regenerateHealthPowerUp);
+            regenerations.push(regenerateHealthPowerUp); 
         }, undefined, function (error) {
             console.error("Error loading regeneration health power-up:", error);
         });
@@ -1165,54 +1180,35 @@ function startGame() {
      * update the regeneration health and apply it to the spaceship based on the distance
      */
     function updateRegenerationHealthPowerUp() {
-        shields.forEach((shieldIcon, index) => {
-            shieldIcon.position.x += 0.15; // Move shield icons from left to right
+        regenerations.forEach((regenerationIcon, index) => {
+            // allow the icon to traverse the axis and actually move forward to the space ship
+            regenerationIcon.position.x += 0.15;
 
-            // Calculate distance between the spaceship and the shield icon
-            const xDistance = rocketGroup.position.x - shieldIcon.position.x;
-            const zDistance = rocketGroup.position.z - shieldIcon.position.z;
+            // calculate the distance
+            const xDistance = rocketGroup.position.x - regenerationIcon.position.x;
+            const zDistance = rocketGroup.position.z - regenerationIcon.position.z;
             const distance = Math.sqrt(xDistance * xDistance + zDistance * zDistance);
 
-            // console.log(distance);
-            // TODO: Fix the distance...
-            if (distance < 6.5) { // If shield icon is close to the spaceship (6.5)
-                console.log("Shield collected!");
+            // check if spaceship is close to health regeneration icon
+            if (distance < 6.5) {
+                console.log("Regeneration Health Icon Collected");
 
-                if (!shieldActive) {
-                    shield.visible = true; // Turn on the shield
-                    shieldActive = true;
-                    shieldActivationTime = Date.now(); // Start shield timer
+                // reset the health back to 100
+                rocketHealth = 100;
+                regenStatus = true;
+                updateHealthBar(false);
+
+                // remove the regeneration health icon since we collected it
+                scene.remove(regenerationIcon);
+                regenerations.splice(index, 1);
+
+                // remove the regeneration health icons if they go off screen
+                if (regenerationIcon.position.x > 15) {
+                    scene.remove(regenerationIcon);
+                    regenerations.splice(index, 1);
                 }
-
-                // Remove shield icon after collecting
-                scene.remove(shieldIcon);
-                shields.splice(index, 1);
-            }
-
-            if (shieldIcon.position.x > 15) { // Remove shield icons when they go off-screen
-                scene.remove(shieldIcon);
-                shields.splice(index, 1);
             }
         });
-
-        // Handle shield expiration and color change
-        if (shieldActive) {
-            let elapsed = (Date.now() - shieldActivationTime) / 5000; // Progress from 0 to 1 over 5 seconds
-
-            // Smoothly transition color from blue to yellow
-            let shieldColor = new THREE.Color().lerpColors(
-                new THREE.Color(0x0050FF), // Start (blue)
-                new THREE.Color(0xFFFF00), // End (yellow)
-                elapsed // Interpolation factor (0 to 1)
-            );
-            shield.material.color.set(shieldColor);
-
-            if (elapsed >= 1) { // Turn off shield after 5 seconds
-                shield.visible = false;
-                shieldActive = false;
-                console.log("Shield deactivated.");
-            }
-        }
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -1420,6 +1416,7 @@ function startGame() {
         exaustAnimation();
         secondaryBulletAnimation();
         updateShieldPowerUp();
+        updateRegenerationHealthPowerUp();
 
         asteroids.forEach((asteroid, index) => {
             asteroid.position.x += 0.15; // Move asteroids from left to right
