@@ -719,9 +719,9 @@ function startGame() {
         return stars;
     }
 
-/**
- * function to animate our stars so that they are not static and move in the spaceships direction
- */
+    /**
+     * function to animate our stars so that they are not static and move in the spaceships direction
+     */
     function animateStars() {
         const positions = starField.geometry.attributes.position.array;
 
@@ -1006,7 +1006,6 @@ function startGame() {
      * create a meteor shower
      */
     function createMeteorShower() {
-        
     }
 
     /**
@@ -1044,7 +1043,6 @@ function startGame() {
             });
         scaleTween.start();
     }
-
 
     /**
      * function responsible for end game functionality
@@ -1144,6 +1142,78 @@ function startGame() {
 
     // create our celestial objects
     createCelestialObjects();
+
+    /**
+     * function to create the regeneration health icon
+     */
+    function createRegenerationHealthPowerUp() {
+        loader.load('models/shieldIcon.glb', function (gltf) {
+            const shieldPowerUp = gltf.scene;
+            
+            shieldPowerUp.position.set(-25, -2, (Math.random()*15)-1); // Spawn randomly along the Z-axis
+            shieldPowerUp.scale.set(4, 4, 4);
+
+            scene.add(shieldPowerUp);
+            shields.push(shieldPowerUp); 
+            shieldPowerUp.rotateY(Math.PI / 2);
+        }, undefined, function (error) {
+            console.error("Error loading regeneration health power-up:", error);
+        });
+    }
+
+    /**
+     * update the regeneration health and apply it to the spaceship based on the distance
+     */
+    function updateRegenerationHealthPowerUp() {
+        shields.forEach((shieldIcon, index) => {
+            shieldIcon.position.x += 0.15; // Move shield icons from left to right
+
+            // Calculate distance between the spaceship and the shield icon
+            const xDistance = rocketGroup.position.x - shieldIcon.position.x;
+            const zDistance = rocketGroup.position.z - shieldIcon.position.z;
+            const distance = Math.sqrt(xDistance * xDistance + zDistance * zDistance);
+
+            // console.log(distance);
+            // TODO: Fix the distance...
+            if (distance < 6.5) { // If shield icon is close to the spaceship (6.5)
+                console.log("Shield collected!");
+
+                if (!shieldActive) {
+                    shield.visible = true; // Turn on the shield
+                    shieldActive = true;
+                    shieldActivationTime = Date.now(); // Start shield timer
+                }
+
+                // Remove shield icon after collecting
+                scene.remove(shieldIcon);
+                shields.splice(index, 1);
+            }
+
+            if (shieldIcon.position.x > 15) { // Remove shield icons when they go off-screen
+                scene.remove(shieldIcon);
+                shields.splice(index, 1);
+            }
+        });
+
+        // Handle shield expiration and color change
+        if (shieldActive) {
+            let elapsed = (Date.now() - shieldActivationTime) / 5000; // Progress from 0 to 1 over 5 seconds
+
+            // Smoothly transition color from blue to yellow
+            let shieldColor = new THREE.Color().lerpColors(
+                new THREE.Color(0x0050FF), // Start (blue)
+                new THREE.Color(0xFFFF00), // End (yellow)
+                elapsed // Interpolation factor (0 to 1)
+            );
+            shield.material.color.set(shieldColor);
+
+            if (elapsed >= 1) { // Turn off shield after 5 seconds
+                shield.visible = false;
+                shieldActive = false;
+                console.log("Shield deactivated.");
+            }
+        }
+    }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * exhaust animation
