@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { initKeyboardControls, heightController, lengthController, fpsController, debugCamController, settings, ammoController, showHitboxController } from './guiControls.js'; 
+﻿import * as THREE from 'three';
+import { initKeyboardControls, fpsController, debugCamController, settings, ammoController, showHitboxController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
