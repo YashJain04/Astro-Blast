@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { initKeyboardControls, heightController, lengthController, fpsController, debugCamController, settings, ammoController } from './guiControls.js'; 
+import { initKeyboardControls, heightController, lengthController, fpsController, debugCamController, settings, ammoController, showHitboxController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
 import { FireEffect } from './fire.js'; // fire particles
@@ -348,7 +348,8 @@ function startGame() {
             }
 
             const asteroid = gltf.scene;
-            asteroid.position.set(-40, 1, Math.random() * 14 - 7);
+            // TODO: We should remove this line... no longer needed so I commented it out.
+            // asteroid.position.set(-40, 1, Math.random() * 14 - 7);
             singleAsteroidGroup.add(asteroid)
             
             const asteroidHitbox = new THREE.BoxHelper(asteroid, 'red')
@@ -1117,12 +1118,11 @@ function startGame() {
             gameStatus = false;
 
             // remove any text
-            startButton.remove();
             gameOverText.remove();
 
             // FORCE RELOAD...
             location.replace(window.location.href);
-        }, 8000);
+        }, 3000);
     }
 
     // create our celestial objects
