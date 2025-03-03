@@ -123,14 +123,14 @@ function startGame() {
     // create controls
     let controls;
     debugCamController.onChange((value) => {
-        if(controls == null)
+        if (controls == null)
             controls = new OrbitControls(camera, renderer.domElement);
     
         controls.enableDamping = value;
         controls.enablePan = value;
         controls.enableRotate = value;
     
-        if(value)
+        if (value)
             scene.add(axesHelper);
         else
             scene.remove(axesHelper);
@@ -361,7 +361,7 @@ function startGame() {
         loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
 
             const singleAsteroidGroup = new THREE.Group() //THREE.Group used to store a single asteroid
-            singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
+            singleAsteroidGroup.position.set(-25, 2, Math.random() * 14 - 7); // Start from the left side with random Z position
             
             if (gameStatus) {
                 scene.add(singleAsteroidGroup)
@@ -1388,10 +1388,9 @@ function startGame() {
     }
 
     // FPS related stuff
-let previousDelta = 0
-function animate(currentDelta) {
-
-    console.log(rocketHealth)
+    let previousDelta = 0
+    function animate(currentDelta) {
+        console.log(rocketHealth)
 
         if (showHitboxController.getValue()){
             hitboxes.forEach(hitbox=>{
@@ -1418,11 +1417,9 @@ function animate(currentDelta) {
             // console.log(initialSmokePosition)
             smokeEffect.update(initialSmokePosition)
         }
-        
-
+            
         // console.log()
-        
-
+            
         requestAnimationFrame(animate);
         if (!orangeCone || !orangeCone2 || !orangeCone3) return; // Wait for the spaceship to load
 
