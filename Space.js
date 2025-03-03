@@ -822,6 +822,7 @@ function startGame() {
         animateEarth();
     }
 
+    let flashOnce = true;
     /**
      * create saturn
      */
@@ -894,6 +895,11 @@ function startGame() {
             }
             if (planet.position.x > -50){
                 warp.visible = false;
+            }
+            if(planet.position.x > -50 && flashOnce){
+                flashOnce = false;
+                triggerFlashEffect();
+                
             }
         }
 
@@ -1222,6 +1228,14 @@ function startGame() {
     
         // call the animation
         animateMeteors();
+    }
+
+    function triggerFlashEffect() {
+        const flash = document.getElementById('flashEffect');
+        flash.style.opacity = '1';  // Make it fully white
+        setTimeout(() => {
+            flash.style.opacity = '0';  // Fade it out
+        }, 100); // Adjust timing if needed
     }
 
     /**
