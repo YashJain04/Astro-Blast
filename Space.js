@@ -6,15 +6,18 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loadi
 import FireParticleEffect from './fireParticleEffect/fire.js';
 import SmokeEffect from './rocketSmokeParticleEffect/smoke.js';
 
-
 // variable to keep track of our game (initially the game is not started)
 let gameStatus = false;
 
+// variables to keep track of our fire particles and smoke effects
 let smokeEffect = null
 let fireParticleSystems = []
 
 // if the game has not started
 if (!gameStatus) {
+    // indicate to our user that the game is not in motion
+    console.log("The game has not started yet.")
+
     // load our background image
     document.body.style.backgroundImage = "url('models/spaceBackground6.webp')";
 
@@ -84,8 +87,8 @@ if (!gameStatus) {
  * function that is responsible for the game starting
  */
 function startGame() {
-    // indicate that the game has started
-    // console.log("Game Started!")
+    // indicate to our user that the game has started
+    console.log("Let the games begin!")
 
     // render our health bar right away
     const healthBar = document.getElementById('healthBar');
@@ -123,24 +126,21 @@ function startGame() {
     // create controls
     let controls;
     debugCamController.onChange((value) => {
-        if (controls == null)
-            controls = new OrbitControls(camera, renderer.domElement);
+        if (controls == null) controls = new OrbitControls(camera, renderer.domElement);
     
         controls.enableDamping = value;
         controls.enablePan = value;
         controls.enableRotate = value;
     
-        if (value)
-            scene.add(axesHelper);
-        else
-            scene.remove(axesHelper);
+        if (value) scene.add(axesHelper);
+        else scene.remove(axesHelper);
     });
 
     // added vertical grid
     const verticalGrid = new THREE.GridHelper(50, 50);
     verticalGrid.rotation.x = Math.PI / 2; // rotate 90 degrees to align with the YZ plane
     verticalGrid.position.z = -25; // move the grid to the back of the scene
-    //scene.add(verticalGrid, gridhelper);
+    // scene.add(verticalGrid, gridhelper);
 
     // add the controls, axis lines/helper, and the ambient lighting to the scene
     scene.add(controls, axesHelper, ambientLight);
@@ -184,6 +184,7 @@ function startGame() {
     rocketGroup.rotateY(-Math.PI/2)
     scene.add(rocketGroup)
 
+    // fire blasters
     let orangeCone, orangeCone2, orangeCone3;
     let AmmoJS = 0
 
@@ -191,12 +192,12 @@ function startGame() {
     const shields = [];
     let shieldActive = false;
     let shieldActivationTime = 0;
-    setInterval(createShieldPowerUp, 6500);
+    setInterval(createShieldPowerUp, 7500);
 
     // regeneration health power up management
     const regenerations = [];
     let regenStatus = false;
-    setInterval(createRegenerationHealthPowerUp, 15500);
+    setInterval(createRegenerationHealthPowerUp, 20000);
 
     // initialize a loader to load models in .glb format
     const loader = new GLTFLoader();
@@ -213,7 +214,6 @@ function startGame() {
             new FireParticleEffect(rocket, new THREE.Vector3(1.5, 3, -9.5))
         )
 
-        
         // add rocket to our rocket group
         rocketGroup.add(rocket)
 
@@ -226,11 +226,7 @@ function startGame() {
         hitboxes.push(rocketHitbox)
         rocketGroup.add(rocketHitbox)
     
-
-
-        // TODO: position the rocket to the center of the scene
-        // rocket.position.x = 5;
-        // rocket.position.y = 0.5;
+        // position our rocket
         rocket.position.y = 0.5;
     
         // create geometries and materials
@@ -258,7 +254,6 @@ function startGame() {
         // rocket.add(orangeCone3);
 
     }, undefined, function (error) {
-        // in case of error
         console.error(error);
     });
 
@@ -269,8 +264,8 @@ function startGame() {
 
         // scale the bullet in size
         bulletModel.scale.set(0.05, 0.05, 0.05);
+        
     }, undefined, function (error) {
-        // in case of error
         console.error(error);
     });
 
@@ -348,7 +343,6 @@ function startGame() {
 
         window.addEventListener('keydown', onKeyDown, false);
         window.addEventListener('keyup', onKeyUp, false);
-
     }
 
     /**
@@ -361,23 +355,19 @@ function startGame() {
         loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
 
             const singleAsteroidGroup = new THREE.Group() //THREE.Group used to store a single asteroid
-            singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
+            singleAsteroidGroup.position.set(-25, 0.5, Math.random() * 11 - 5.5); // Start from the left side with random Z position
             
             if (gameStatus) {
                 scene.add(singleAsteroidGroup)
             }
 
             const asteroid = gltf.scene;
-            // TODO: We should remove this line... no longer needed so I commented it out.
-            // asteroid.position.set(-40, 1, Math.random() * 14 - 7);
             singleAsteroidGroup.add(asteroid)
             
             const asteroidHitbox = new THREE.BoxHelper(asteroid, 'red')
             singleAsteroidGroup.add(asteroidHitbox)
             hitboxes.push(asteroidHitbox)
 
-            
-            
             asteroids.push(singleAsteroidGroup);
             
 
@@ -404,6 +394,7 @@ function startGame() {
         scene.add(explosion);
     }
     
+    // position our camera
     camera.position.x = 6;
     camera.position.y = 4;
     camera.rotateY(Math.PI / 2);
@@ -458,7 +449,6 @@ function startGame() {
             scene.add(secondaryBullet);
             secondaryBullets.push(secondaryBullet);
             // console.log('Secondary bullet fired');
-            
         }
     });
 
@@ -479,7 +469,6 @@ function startGame() {
 
             //if player is not pressing 'left' or 'right', display idle animation
             if (!arrowKeysState[1] && !arrowKeysState[3]){
-
                 //physics for movement of the spaceship
                 linearAcceleration[1] = -1 * INERTIA * rocket.position.y
                 linearVelocity[1] += linearAcceleration[1]
@@ -492,7 +481,6 @@ function startGame() {
 
             }
             else{
-
                 const HEIGHT_DIP_CAP = -0.5
                 const DIP_ACCELERATION = -0.0005
                 const rotationAngleCap = 0.2 * Math.PI
@@ -593,8 +581,6 @@ function startGame() {
             //if (missileFireEffects[missile.mesh.uuid]) {
             //    missileFireEffects[missile.mesh.uuid].animate(missile.mesh.position.z, missile.mesh.position.y, 0.25);
             //}
-
-
         }
     }
 
@@ -635,10 +621,9 @@ function startGame() {
      * @param {*} collisionStatus boolean to track where it was called from
      */
     function updateHealthBar(collisionStatus) {
-
         // if the spaceship actually collided with an asteroid this will execute
         if (collisionStatus && !shield.visible) {
-            console.log("Ship has collided!. Time to deduct health.")
+            // console.log("Ship has collided!. Time to deduct health.")
             const healthBar = document.getElementById('healthBar');
             
             // Update the health bar’s width based on the current health
@@ -655,7 +640,7 @@ function startGame() {
 
         // if the spaceship hit a shield icon...solidify the health bar to look like rock
         else if (!collisionStatus && shield.visible) {
-            console.log("The spaceship is shielded, so solidify the health bar.");
+            // console.log("The spaceship is shielded, so solidify the health bar.");
             const healthBar = document.getElementById('healthBar');
             
             // give the health bar a rock-like appearance
@@ -669,7 +654,7 @@ function startGame() {
 
         // else if the spaceship is not currently shielded and not in collision with anything
         else if (!collisionStatus && !shield.visible) {
-            console.log("The spaceship is in it's regular state (no collision or powerups) thus display the health bar as normal.");
+            // console.log("The spaceship is in it's regular state (no collision or powerups) thus display the health bar as normal.");
             const healthBar = document.getElementById('healthBar');
         
             // apply the gradient background
@@ -1152,8 +1137,7 @@ function startGame() {
         // add it to our document
         document.body.appendChild(heartImage);
 
-        // automatically restar the game after 8 seconds
-        // having the user do it on clicks is hard
+        // automatically restart the game after 5 seconds
         setTimeout(() => {
             console.log("We are restarting the game");
             
@@ -1165,7 +1149,7 @@ function startGame() {
 
             // FORCE RELOAD...
             location.replace(window.location.href);
-        }, 3000);
+        }, 5000);
     }
 
     // create our celestial objects
@@ -1175,56 +1159,76 @@ function startGame() {
      * function to create the regeneration health icon
      */
     function createRegenerationHealthPowerUp() {
+        // load our 3D heart model
         loader.load('models/heart.glb', function (gltf) {
-            const regenerateHealthPowerUp = gltf.scene;
+            // create the THREE Group for heart icons and map it to valid values meaning...
+            // all the way back and where the spaceship can possibly be in terms of y axis and z axis
+            const singleHealthIconGroup = new THREE.Group();
+            singleHealthIconGroup.position.set(-25, 0.5, Math.random() * 11 - 5.5);
             
-            // spawn randomly along the z axis
-            regenerateHealthPowerUp.position.set(-25, -2, (Math.random())-1);
-            regenerateHealthPowerUp.scale.set(0.25, 0.25, 0.25);
+            // get the actual power up icon and scale it smaller
+            const regenerateHealthPowerUp = gltf.scene;
+            regenerateHealthPowerUp.scale.set(0.3, 0.3, 0.3);
 
-            scene.add(regenerateHealthPowerUp);
-            regenerations.push(regenerateHealthPowerUp); 
+            // create a hitbox for the icon and scale it smaller
+            const healthIconHitbox = new THREE.BoxHelper(regenerateHealthPowerUp, 'pink')
+            healthIconHitbox.scale.set(0.3, 0.3, 0.3);
+
+            // update it to recalculate bounding box and get correct dimensions
+            healthIconHitbox.update();
+
+            // add them to the group
+            singleHealthIconGroup.add(regenerateHealthPowerUp);
+            singleHealthIconGroup.add(healthIconHitbox);
+
+            // push to the array for all regenerations
+            regenerations.push(singleHealthIconGroup); 
+
+            // add it to the scene
+            scene.add(singleHealthIconGroup)
         }, undefined, function (error) {
             console.error("Error loading regeneration health power-up:", error);
         });
     }
 
     /**
-     * update the regeneration health and apply it to the spaceship based on the distance
+     * update the regeneration health and apply it to the spaceship if the boxes intersect
      */
     function updateRegenerationHealthPowerUp() {
-        regenerations.forEach((regenerationIcon, index) => {
-            // allow the icon to traverse the axis and actually move forward to the space ship
-            regenerationIcon.position.x += 0.15;
+        // ensure we have a valid box helper for the spaceship
+        if (rocketGroup.children[2]) {
+            // retrieve the hit box for the spaceship
+            const rocketHitbox = new THREE.Box3().setFromObject(rocketGroup.children[2]);
+        
+            // loop through the regenerations
+            regenerations.forEach(regenerationGroup => {
+        
+                // ensure we have a valid box helper for the regeneration
+                if (regenerationGroup.children[1]) {
+                    // retrieve the hit box for the regeneration
+                    const regenHitbox = new THREE.Box3().setFromObject(regenerationGroup);
+        
+                    // if the boxes intersect this means the spaceship has collided with the health icon
+                    if (rocketHitbox.intersectsBox(regenHitbox)) {
+                        // update status to user
+                        console.log("You have collected a power-up! The health restores back to max health.")
 
-            // calculate the distance
-            const xDistance = rocketGroup.position.x - regenerationIcon.position.x;
-            const zDistance = rocketGroup.position.z - regenerationIcon.position.z;
+                        // set the health back to 100 and update the health bar accordingly
+                        rocketHealth = 100;
+                        regenStatus = true;
+                        updateHealthBar(false);
 
-            // check if spaceship is close to health regeneration icon
-            if (xDistance < 0.1 && zDistance < -2) {
-                console.log("Debug Values...")
-                console.log(xDistance);
-                console.log(zDistance);
+                        // remove everything from the regeneration group because the user has collected it
+                        regenerationGroup.children.forEach(child=>{
+                            regenerationGroup.remove(child);
+                        })
 
-                console.log("Regeneration Health Icon Collected");
-
-                // reset the health back to 100
-                rocketHealth = 100;
-                regenStatus = true;
-                updateHealthBar(false);
-
-                // remove the regeneration health icon since we collected it
-                scene.remove(regenerationIcon);
-                regenerations.splice(index, 1);
-
-                // remove the regeneration health icons if they go off screen
-                if (regenerationIcon.position.x > 15) {
-                    scene.remove(regenerationIcon);
-                    regenerations.splice(index, 1);
+                        // remove the regeneration health group from the scene
+                        scene.remove(regenerationGroup)
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
@@ -1306,9 +1310,9 @@ function startGame() {
             // TODO: Fix the distance...
             // original condition was ========= distance < 6.5
             if (xDistance < 0.1 && zDistance < -2) { // If shield icon is close to the spaceship
-                console.log("Debug Values...")
-                console.log(xDistance);
-                console.log(zDistance);
+                // console.log("Debug Values...")
+                // console.log(xDistance);
+                // console.log(zDistance);
 
                 console.log("Shield collected!");
 
@@ -1352,60 +1356,64 @@ function startGame() {
     /**
      * function used to check if the hitbox of an asteroid collides with the hitbox of the spaceship
      * */
-    function checkForAsteroidCollision(){
+    function checkForAsteroidCollision(){        
+        // ensure we have a valid box helper for the spaceship
+        if (rocketGroup.children[2]){
+            // retrieve the hit box for the spaceship
+            const rocketHitbox = new THREE.Box3().setFromObject(rocketGroup.children[2]) 
 
-        console.log(rocketGroup.children[3]);
-
-        console.log("is this even running")
-        
-
-        if (rocketGroup.children[3]){
-            console.log("dude this is getting exec..")
-            const rocketHitbox = new THREE.Box3().setFromObject(rocketGroup.children[3]) 
-
+            // loop through the asteroids
             asteroids.forEach(asteroidGroup=>{
-                if (asteroidGroup.children[1]){
-                    const asteroidHitbox = new THREE.Box3().setFromObject(asteroidGroup) 
-                    console.log("Rocket Hitbox:", rocketHitbox);
-                    console.log("Asteroid Hitbox:", asteroidHitbox);
 
+                // ensure we have a valid box helper for the asteroid
+                if (asteroidGroup.children[1]){
+                    // retrieve the hit box for the asteroid
+                    const asteroidHitbox = new THREE.Box3().setFromObject(asteroidGroup)
+
+                    // if the boxes intersect this means the spaceship has collided with the asteroid
                     if (rocketHitbox.intersectsBox(asteroidHitbox)){
-                        console.log("EFAINOFKDNAKFNAKLFNKLDSF DKALSFBKLABFKLAFBKLABFKALBFKAL");
-                        // console.log(asteroidGroup.children[0].children[0].position)
+                        // call the handle collision function on this asteroid group
                         handleCollision(asteroidGroup)
                     }
                 }      
             })
         }
-        
-
     }
 
     /**
      * called when a collision between an asteroid and the rocket has been detected
-     * old logic at the bottom of the function
      * */
     function handleCollision(asteroidGroup){
+        // remove everything from the asteroid group because the user has hit the asteroid
         asteroidGroup.children.forEach(child=>{
             asteroidGroup.remove(child)
         })
-        // console.log(asteroidGroup.children)
-        asteroids.filter(a=>a==asteroidGroup)
+
+        // remove the asteroid group from the scene
         scene.remove(asteroidGroup)
 
+        // update the health bar accordingly (user hit the asteroid so spaceship takes damage)
         updateHealthBar(true);
+
+        // TODO: REMOVE THIS....?
+        // console.log(asteroidGroup.children)
+        //the following line of code doesnt actually do anything...
+        // asteroids.filter(a=>a==asteroidGroup)
     }
 
     // FPS related stuff
     let previousDelta = 0
-    function animate(currentDelta) {
-        console.log(rocketHealth)
 
+    // animation function
+    function animate(currentDelta) {
+        // if the user has selected that hit boxes should be turned ON
         if (showHitboxController.getValue()){
             hitboxes.forEach(hitbox=>{
                 hitbox.visible = true
             })
         }
+
+        // else the user has selected that hit boxes should be turned OFF
         else{
             hitboxes.forEach(hitbox=>{
                 hitbox.visible = false
@@ -1413,39 +1421,51 @@ function startGame() {
             
         }
 
-        checkForAsteroidCollision()
-        fireParticleSystems.forEach(fireParticleSystem=>{
-            fireParticleSystem.update()
-        })
-    
+        // if the health falls below 50 then add smoke to the rocket indicating poor health and status
         if (rocket && smokeEffect && rocketHealth <= 50){
             let initialSmokePosition = new THREE.Vector3(0, 1, 0)
             let rocketPos = new THREE.Vector3(0, 0, 0) 
             rocket.getWorldPosition(rocketPos)
             initialSmokePosition.add(rocketPos)
-            // console.log(initialSmokePosition)
             smokeEffect.update(initialSmokePosition)
         }
-            
-        // console.log()
-            
-        requestAnimationFrame(animate);
-        if (!orangeCone || !orangeCone2 || !orangeCone3) return; // Wait for the spaceship to load
 
-        // check if the rocket is hit
-        // checkCollisions()
+        // if the health back is back to over 50 it is because the user has hit a special ability (health power up)
+        // thus we have to account for the smoke and effectively stop it
+        if (rocket && smokeEffect && rocketHealth >= 50){
+            smokeEffect.stop();
+        }
 
+        // check if the spaceship has hit an asteroid
+        checkForAsteroidCollision()
+
+        // check if the spaceship has hit the health power up
+        updateRegenerationHealthPowerUp();
+
+        // animate our stars and create the star field essentially
         animateStars();
 
-        var delta = currentDelta - previousDelta
-        // console.log(delta)
-        const FPS = fpsController.getValue()
+        // update the fire particles
+        fireParticleSystems.forEach(fireParticleSystem=>{
+            fireParticleSystem.update()
+        })
+        
+        // animate
+        requestAnimationFrame(animate);
 
+        // wait for the spaceship to load
+        if (!orangeCone || !orangeCone2 || !orangeCone3) return;
+
+        // FPS
+        var delta = currentDelta - previousDelta
+        const FPS = fpsController.getValue()
         if (FPS && delta < 1000 / FPS) {
             return;
         }
 
+        // animate our spaceship so that it jiggles and wiggles
         animateSpaceship()
+
         // if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
         //     fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
         // }
@@ -1453,20 +1473,40 @@ function startGame() {
         //console.log(rocketGroup.position)
         //console.log(rocketGroup.position.z);
 
+        // if there are asteroids call the homing missiles functions
         if(asteroids.length != 0){updateHomingMissiles(bullets, asteroids)}
-        exaustAnimation();
-        secondaryBulletAnimation();
-        updateShieldPowerUp();
-        updateRegenerationHealthPowerUp();
 
+        // start the exhaust animation
+        exaustAnimation();
+
+        // start the secondary bullet animation
+        secondaryBulletAnimation();
+
+        // check if the spaceship has hit the shield power up
+        updateShieldPowerUp();
+
+        // for every regeneration move it along the x axis so that it comes all the way from the back to the front
+        // it also removes any regenerations if they pass the spaceship as the user has not collected it (to avoid cluttering and lagging the scene)
+        regenerations.forEach((regenerationGroup, index) => {
+            regenerationGroup.position.x += 0.15;
+            if (regenerationGroup.position.x > 15) {
+                scene.remove(regenerationGroup);
+                regenerations.splice(index, 1)
+            }
+        });
+
+        // for every asteroid move it along the x axis so that it comes all the way from the back to the front
+        // it also removes any asteroids if they pass the spaceship as the user has avoided it (to avoid cluttering and lagging the scene)
         asteroids.forEach((asteroid, index) => {
-            asteroid.position.x += 0.15; // Move asteroids from left to right
-            if (asteroid.position.x > 15) { // Remove asteroid when it goes off-screen
+            asteroid.position.x += 0.15;
+            if (asteroid.position.x > 15) {
                 scene.remove(asteroid);
                 asteroids.splice(index, 1);
             }
         });
 
+        // for every explosion scale it and set the opacity
+        // it also removes any explosions from the scene if opacity is 0 (to avoid cluttering and lagging the scene)
         explosions.forEach((explosion, index) => {
             explosion.geometry.scale(1.4, 1.4, 1.4);
             explosion.material.opacity -= 0.3;
@@ -1477,36 +1517,19 @@ function startGame() {
             }
         });
 
+        // rotate the shield around the z axis
         shield.rotation.z += 0.01;
+        
+        // rotate the warp around the z axis
         warp.rotation.z += 0.015;
 
+        // render the scene with the camera
         renderer.render(scene, camera);
 
+        // FPS
         previousDelta = currentDelta;
 
+        // constantly check for updates to the health bar (sizing + colours - etc.)
         updateHealthBar(false);
     }
-
-    /**
-     * function to check for collisions and update health bar
-     * OLD FUNCTION, NEW FUNCTION HAS BEEN DEFINED BELOW
-     */
-    // function checkCollisions() {
-    //     // for each asteroid check the distance to the rocket
-    //     asteroids.forEach((asteroid, index) => {
-    //         const distance = rocketGroup.position.distanceTo(asteroid.position);
-
-    //         // if the asteroid is extremely close to rocket it has been hit
-    //         if (distance < 2) {
-    //             console.log("Rocket has been hit by the asteroid");
-
-    //             rocketHealth -= 10; // reduce the health
-    //             updateHealthBar() // update the health bar
-
-    //             // remove the asteroid after the collision
-    //             scene.remove(asetroid);
-    //             asteroids.splice(index, 1);
-    //         }
-    //     });
-    // }
 }

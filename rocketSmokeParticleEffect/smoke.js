@@ -149,5 +149,16 @@ export default class SmokeEffect {
 
     }
 
+    /**
+     * stop all smoke animations and effects effectively immediately
+     */
+    stop() {
+        // clear all particles
+        this.particles = [];
+        this.geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(this.PARTICLE_COUNT * 3), 3));
+        this.geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(this.PARTICLE_COUNT * 3), 3));
+    }
+    
+
     
 }
