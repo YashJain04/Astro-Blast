@@ -1182,7 +1182,10 @@ function startGame() {
             singleHealthIconGroup.add(healthIconHitbox);
 
             // push to the array for all regenerations
-            regenerations.push(singleHealthIconGroup); 
+            regenerations.push(singleHealthIconGroup);
+
+            // add it to our hit boxes array as well
+            hitboxes.push(healthIconHitbox);
 
             // add it to the scene
             scene.add(singleHealthIconGroup)
@@ -1229,52 +1232,7 @@ function startGame() {
             });
         }
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * exhaust animation
-     */
-    function exaustAnimation() {
-        const cones = [orangeCone, orangeCone2, orangeCone3];
-
-        cones.forEach((cone, index) => {
-            // Randomly change color to different shades of orange
-            const hue = (20 + Math.sin(Date.now() * 0.003 + index) * 10) % 360; // Hue oscillates between 10-30
-            const slowOrange = new THREE.Color(`hsl(${hue}, 100%, 50%)`);
-            cone.material.color.set(slowOrange);
-
-            // Pulsing effect (scaling up and down)
-            const scale = 1 + 0.075 * Math.sin(Date.now() * 0.005);
-            cone.scale.set(scale, scale, scale);
-        });
-    }
-
-    /**
-     * Secondary bullet animation
-     */
-    function secondaryBulletAnimation(){
-        for (let i = secondaryBullets.length - 1; i >= 0; i--) {
-            secondaryBullets[i].position.x -= 0.15;
-
-            // if there are asteroids
-            if (asteroids.length > 0){
-                let closestTarget = findClosestTarget(secondaryBullets[i].position, asteroids);
-                // If the bullet has collided with the target, remove it
-                if(closestTarget.position.distanceTo(secondaryBullets[i].position) < 0.5) {
-                    scene.remove(closestTarget);
-                    scene.remove(secondaryBullets[i]);
-                    secondaryBullets.splice(i, 1);
-                    createExplosion(closestTarget.position);
-                }
-            }
-
-            // Remove bullets if they go out of bounds
-            if (secondaryBullets[i].position.x < -30) {
-                scene.remove(secondaryBullets[i]);
-                secondaryBullets.splice(i, 1);
-            }
-        } 
-    }
-
+    
     /**
      * Function to create a shield power-up icon
      */
@@ -1304,7 +1262,10 @@ function startGame() {
             singleShieldIconGroup.add(shieldIconHitbox);
             
             // push it to the array for all shields
-            shields.push(singleShieldIconGroup)
+            shields.push(singleShieldIconGroup);
+
+            // add it to our hit boxes array as well
+            hitboxes.push(shieldIconHitbox);
 
             // add it to the scene
             scene.add(singleShieldIconGroup);
@@ -1375,6 +1336,51 @@ function startGame() {
                 }
             }
         }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * exhaust animation
+     */
+    function exaustAnimation() {
+        const cones = [orangeCone, orangeCone2, orangeCone3];
+
+        cones.forEach((cone, index) => {
+            // Randomly change color to different shades of orange
+            const hue = (20 + Math.sin(Date.now() * 0.003 + index) * 10) % 360; // Hue oscillates between 10-30
+            const slowOrange = new THREE.Color(`hsl(${hue}, 100%, 50%)`);
+            cone.material.color.set(slowOrange);
+
+            // Pulsing effect (scaling up and down)
+            const scale = 1 + 0.075 * Math.sin(Date.now() * 0.005);
+            cone.scale.set(scale, scale, scale);
+        });
+    }
+
+    /**
+     * Secondary bullet animation
+     */
+    function secondaryBulletAnimation(){
+        for (let i = secondaryBullets.length - 1; i >= 0; i--) {
+            secondaryBullets[i].position.x -= 0.15;
+
+            // if there are asteroids
+            if (asteroids.length > 0){
+                let closestTarget = findClosestTarget(secondaryBullets[i].position, asteroids);
+                // If the bullet has collided with the target, remove it
+                if(closestTarget.position.distanceTo(secondaryBullets[i].position) < 0.5) {
+                    scene.remove(closestTarget);
+                    scene.remove(secondaryBullets[i]);
+                    secondaryBullets.splice(i, 1);
+                    createExplosion(closestTarget.position);
+                }
+            }
+
+            // Remove bullets if they go out of bounds
+            if (secondaryBullets[i].position.x < -30) {
+                scene.remove(secondaryBullets[i]);
+                secondaryBullets.splice(i, 1);
+            }
+        } 
     }
 
     /**
