@@ -645,7 +645,7 @@ function startGame() {
             
             // give the health bar a rock-like appearance
             healthBar.style.backgroundColor = 'gray';
-            healthBar.style.backgroundImage = 'url("models/rockTexture.jpg")'; // load the rock texture
+            healthBar.style.backgroundImage = 'url("models/rockTexture2.png")'; // load the rock texture
             healthBar.style.backgroundSize = 'cover';
             healthBar.style.borderRadius = '5px';
             healthBar.style.boxShadow = 'inset 0 0 10px rgba(0, 0, 0, 0.5)';
@@ -761,7 +761,7 @@ function startGame() {
         createPlanetsAndMoon();
         // TODO:
         // createVolumetricNebula();
-        // createGlowingCometWithTail();
+        createGlowingCometWithTail();
         createMeteorShower();
     }
 
@@ -1012,11 +1012,101 @@ function startGame() {
      * create a glowing comet with a tail and streak
      */
     function createGlowingCometWithTail() {
-    }
+        // create the comet geometry and material
+        const cometGeometry = new THREE.SphereGeometry(10, 32, 32);
+        const cometMaterial = new THREE.MeshStandardMaterial({
+            color: 0xff5500,
+            emissive: 0xff5500,
+            emissiveIntensity: 1.5
+        });
+
+        // construct the comet from the geometry and material
+        const comet = new THREE.Mesh(cometGeometry, cometMaterial);
+
+        // initially set the position for the comet to be at the bottom right of the screen
+        comet.position.set(-600, -750, -1000);
+
+        // add the comet to our scene
+        scene.add(comet);
+        
+        // initialize some tail variables
+        const tailLength = 100;
+        const tailWidth = 20;
+        
+        // create the tail geometry
+        const tailGeometry = new THREE.PlaneGeometry(tailLength, tailWidth, 1, 1);
+        
+        // create the tail material (using a custom shader for a better fade + gradient colour)
+        const tailMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                // fade with yellow and pink
+                uColor1: { value: new THREE.Color(0xffff00) },
+                uColor2: { value: new THREE.Color(0xff66cc) },
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uColor1;
+                uniform vec3 uColor2;
+                varying vec2 vUv;
+                
+                void main() {
+                    // blend the yellow and pink
+                    vec3 gradientColor = mix(uColor1, uColor2, vUv.x);
+
+                    // fade this out at the end (it should NOT be solid at the end of the comet - otherwise it doesn't look clean)
+                    float alpha = smoothstep(0.0, 1.0, vUv.x);
+                    gl_FragColor = vec4(gradientColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });        
+        
+        // create a tail for the comet from the material
+        const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+
+        // position it so that it is behind
+        tail.position.set(tailLength / 2, 0, 0);
+        tail.rotation.z = Math.PI;
+        
+        // attach the tail to the comet
+        comet.add(tail);
+        
+        // animation function
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // move the comet slowly up
+            comet.position.y += 0.5;
+
+            // move the comet slowly from left to right
+            comet.position.z += 0.5;
+
+            // this gives the tail effect
+            comet.rotation.x += 900;
+
+            // once it's no longer visible to the user just remove it from the scene to prevent clutter and lag
+            if (comet.position.y > 300) {
+                scene.remove(comet);
+            }
+
+            // render
+            renderer.render(scene, camera);
+        }
+        
+        // call the animation
+        animate();
+    }      
 
     /**
-     * TODO:
-     * create a meteor shower
+     * creates a meteor shower
      */
     function createMeteorShower() {
         // some meteor setup such as geometry, position, count, etc.
@@ -1077,7 +1167,7 @@ function startGame() {
     
         // call the animation
         animateMeteors();
-    }    
+    }
 
     /**
      * TODO:
