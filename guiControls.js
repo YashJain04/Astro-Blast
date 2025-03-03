@@ -4,9 +4,9 @@ import dat from 'dat.gui';
 // Define your settings object
 export const settings = { 
   ammo: 100,
-  FPS: 60,
+  FPS: 144,
   debug_cam: false,
-  showHitbox: true
+  showHitbox: false
 };
 
 // Initialize the GUI
