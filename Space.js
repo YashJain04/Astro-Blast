@@ -351,7 +351,7 @@ function startGame() {
         loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
 
             const singleAsteroidGroup = new THREE.Group() //THREE.Group used to store a single asteroid
-            singleAsteroidGroup.position.set(-25, 0.5, Math.random() * 11 - 5.5); // Start from the left side with random Z position
+            singleAsteroidGroup.position.set(-40, 0.5, Math.random() * 11 - 5.5); // Start from the left side with random Z position
             
             if (gameStatus) {
                 scene.add(singleAsteroidGroup)
@@ -373,7 +373,7 @@ function startGame() {
     }
 
     // call this function thus creating asteroids every second
-    setInterval(createAsteroid, 1000);
+    setInterval(createAsteroid, 500);
 
     function createExplosion(position, material) {
         const explosion = new THREE.Points(new THREE.SphereGeometry(5), material);
