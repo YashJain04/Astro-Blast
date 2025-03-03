@@ -13,6 +13,7 @@ let gameStatus = false;
 // variables to keep track of our fire particles and smoke effects
 let smokeEffect = null
 let fireParticleSystems = []
+let animationSpeed = 1
 
 // if the game has not started
 if (!gameStatus) {
@@ -804,10 +805,14 @@ function startGame() {
             // how big the circle should be
             const radius = 80;
 
+            if(!warp.visible){
+                animationSpeed = 0.025;
+            }
+
             // move around x and y and z
-            planet.position.x = Math.cos(time) * radius;
-            planet.position.y = Math.sin(time) * radius;
-            planet.position.z = Math.sin(time) * radius;
+            planet.position.x = Math.cos(time * animationSpeed) * radius;
+            planet.position.y = Math.sin(time * animationSpeed) * radius;
+            planet.position.z = Math.sin(time * animationSpeed) * radius;
         
             // rotate the planet around the y axis
             planet.rotation.y += 0.01;
@@ -836,7 +841,7 @@ function startGame() {
 
         // create the planet and add it to our scene
         const planet = new THREE.Mesh(planetGeometry, planetMaterial);
-        planet.position.set(-50, 0, 20);
+        planet.position.set(-5000, 0, 20);
         scene.add(planet);
 
         // create ring geometry and material
@@ -849,7 +854,7 @@ function startGame() {
 
         // construct the rings and add it to our scene (same spot as our saturn planet)
         const rings = new THREE.Mesh(ringGeometry, ringMaterial);
-        rings.position.set(-50, 0, 20);
+        rings.position.set(-5000, 0, 20);
 
         // tilt it so it looks realistic
         rings.rotation.x = Math.PI / 2.5;
@@ -878,6 +883,17 @@ function startGame() {
             if (planet.position.x > 125) {
                 scene.remove(planet);
                 scene.remove(rings);
+            }
+            if (planet.position.x < -50){
+                planet.position.x += 2;
+                rings.position.x += 2;
+            }
+            if (planet.position.x < -50 && planet.position.x > -100) {
+                planet.position.x += 0.75;
+                rings.position.x += 0.75;
+            }
+            if (planet.position.x > -50){
+                warp.visible = false;
             }
         }
 
@@ -916,8 +932,12 @@ function startGame() {
             const radius = 80;
 
             // move around x and z
-            venus.position.x = Math.cos(time) * radius;
-            venus.position.z = Math.sin(time) * radius;
+            if(!warp.visible){
+                animationSpeed = 0.025;
+            }
+
+            venus.position.x = Math.cos(time * animationSpeed) * radius;
+            venus.position.z = Math.sin(time * animationSpeed) * radius;
 
             // rotate venus around the y axis
             venus.rotation.y += 0.005;
@@ -958,8 +978,11 @@ function startGame() {
             const radius = 80;
 
             // move around y and z
-            moon.position.y = Math.cos(time) * radius;
-            moon.position.z = Math.sin(time) * radius;
+            if(!warp.visible){
+                animationSpeed = 0.025;
+            }
+            moon.position.y = Math.cos(time * animationSpeed) * radius;
+            moon.position.z = Math.sin(time * animationSpeed) * radius;
 
             // rotate the moon around the y axis
             moon.rotation.y += 0.01;
@@ -1386,7 +1409,7 @@ function startGame() {
             // create the THREE Group for shield icons and map it to valid values meaning...
             // all the way back and where the spaceship can possibly be in terms of y axis and z axis
             const singleShieldIconGroup = new THREE.Group();
-            singleShieldIconGroup.position.set(-25, 0.5, Math.random() * (5 - (-1)) + (-1))
+            singleShieldIconGroup.position.set(-25, 0, Math.random() * (5 - (-1)) + (-1))
 
             // get the actual power up icon and scale it and rotate it so that it is facing the correct orientation
             const shieldPowerUp = gltf.scene;
@@ -1417,6 +1440,9 @@ function startGame() {
             console.error("Error loading shield power-up:", error);
         });
     }
+
+
+
 
     /**
      * update the shield power up and apply it to the spaceship based on the distance
