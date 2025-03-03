@@ -365,11 +365,37 @@ function startGame() {
             hitboxes.push(asteroidHitbox)
 
             asteroids.push(singleAsteroidGroup);
-            
+            fadeInAsteroid(asteroid);
 
         }, undefined, function (error) {
             console.error(error);
         });
+    }
+
+        /**
+     * Function to smoothly fade in an asteroid using opacity.
+     */
+    function fadeInAsteroid(asteroid) {
+        asteroid.traverse((child) => {
+            if (child.isMesh) {
+                child.material.transparent = true; 
+                child.material.opacity = 0; // Start with fully invisible
+            }
+        });
+
+        let opacity = 0;
+        const fadeInInterval = setInterval(() => {
+            opacity += 0.05; // Increase opacity gradually
+            asteroid.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.opacity = opacity;
+                }
+            });
+
+            if (opacity >= 1) {
+                clearInterval(fadeInInterval); // Stop the interval when fully visible
+            }
+        }, 50); // Adjust speed of fade-in effect
     }
 
     // call this function thus creating asteroids every second
