@@ -1703,7 +1703,7 @@ function startGame() {
         animateSpaceship()
 
         if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
-            // fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
+            fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
         }
         //console.log(rocket.position.y)
         //console.log(rocketGroup.position)
