@@ -780,6 +780,10 @@ function startGame() {
         createPlanetsAndMoon();
         createGlowingCometWithTail();
         createMeteorShower();
+
+        setTimeout(() => {
+            createSecondGlowingComet();
+        }, 30000);
     }
 
     /**
@@ -1087,6 +1091,96 @@ function startGame() {
 
         // add it to our planet parameter passed in
         planet.add(atmosphere);
+    }
+
+
+    function createSecondGlowingComet() {
+        // create the comet geometry and material
+        const cometGeometry = new THREE.SphereGeometry(12, 32, 32); // Slightly larger comet
+        const cometMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00aaff, // Different blue color
+            emissive: 0x00aaff,
+            emissiveIntensity: 1.5
+        });
+    
+        // construct the comet from the geometry and material
+        const comet = new THREE.Mesh(cometGeometry, cometMaterial);
+    
+        // initially set the position for the comet to be at the bottom left of the screen
+        comet.position.set(-600, -750, -1000);
+    
+        // add the comet to our scene
+        scene.add(comet);
+        
+        // initialize some tail variables
+        const tailLength = 120;
+        const tailWidth = 25;
+        
+        // create the tail geometry
+        const tailGeometry = new THREE.PlaneGeometry(tailLength, tailWidth, 1, 1);
+        
+        // create the tail material (using a different gradient color)
+        const tailMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                // fade with blue and purple
+                uColor1: { value: new THREE.Color(0x66ccff) },
+                uColor2: { value: new THREE.Color(0xaa66ff) },
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uColor1;
+                uniform vec3 uColor2;
+                varying vec2 vUv;
+                
+                void main() {
+                    // blend the blue and purple
+                    vec3 gradientColor = mix(uColor1, uColor2, vUv.x);
+    
+                    // fade this out at the end for a smooth effect
+                    float alpha = smoothstep(0.0, 1.0, vUv.x);
+                    gl_FragColor = vec4(gradientColor, alpha);
+                }
+            `,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });        
+        
+        // create a tail for the comet from the material
+        const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+    
+        // position it so that it is behind
+        tail.position.set(tailLength / 2, 0, 0);
+        tail.rotation.z = Math.PI;
+        
+        // attach the tail to the comet
+        comet.add(tail);
+        
+        // animation function
+        function animate() {
+            requestAnimationFrame(animate);
+    
+            // move the comet slowly up and slightly to the right
+            comet.position.y += 0.55;
+            comet.position.z += 0.6; // Different movement pattern
+    
+            // this gives the tail effect
+            comet.rotation.x += 800; // Slightly slower rotation
+    
+            // once it's no longer visible to the user just remove it from the scene to prevent clutter and lag
+            if (comet.position.y > 300) {
+            //    scene.remove(comet);
+            }
+        }
+        
+        // call the animation
+        animate();
     }
 
     /**
