@@ -269,6 +269,35 @@ function startGame() {
         console.error(error);
     });
 
+    /**
+     * TESTING SHIELD STUFF....
+     * 
+     *  const bubbleLoader = new THREE.TextureLoader();
+
+        // load the bubble
+        let someTexture = bubbleLoader.load('models/textures/bubble.jpg');
+
+        // create a shield for our rocket and add it to our group while scaling in size
+        const material = new THREE.MeshPhysicalMaterial({
+            transparent: true,
+            opacity: 0.9,
+            emissiveIntensity: 0.8,
+            roughness: 0,
+            metalness: 1,
+            transmission: 1,
+            clearcoat: 1,
+            clearcoatRoughness: 0,
+            reflectivity: 1,
+            map: someTexture
+        });    
+        
+        // create sphere geometry with slight distortions for a wavy effect
+        const shieldGeometry = new THREE.SphereGeometry(3.9, 64, 64);
+        const shield = new THREE.Mesh(shieldGeometry, material);
+     * 
+     * 
+     */
+
     // create a shield for our rocket and add it to our group while scaling in size
     const material = new THREE.PointsMaterial({
         color: 0x0050FF,
@@ -281,7 +310,7 @@ function startGame() {
     const shield = new THREE.Points(new THREE.IcosahedronGeometry(5, 5), material);
     rocketGroup.add(shield);
     shield.scale.set(0.5, 0.5, 0.75);
-    shield.visible = false
+    shield.visible = false;
 
     // TODO: warp field (could be removed later, its just a placeholder)
     const warpField = new THREE.PointsMaterial({
