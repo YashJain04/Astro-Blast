@@ -615,7 +615,7 @@ function startGame() {
         }, targets[0]);
     }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /**
      * 
      * @param {*} collisionStatus boolean to track where it was called from
@@ -762,7 +762,7 @@ function startGame() {
         // TODO:
         // createVolumetricNebula();
         // createGlowingCometWithTail();
-        // createMeteorShower();
+        createMeteorShower();
     }
 
     /**
@@ -1019,7 +1019,65 @@ function startGame() {
      * create a meteor shower
      */
     function createMeteorShower() {
-    }
+        // some meteor setup such as geometry, position, count, etc.
+        const meteorGeometry = new THREE.BufferGeometry();
+        const meteorCount = 50;
+        const positions = new Float32Array(meteorCount * 3);
+        const velocities = [];
+    
+        // create random positions
+        for (let i = 0; i < meteorCount; i++) {
+            positions[i * 3] = Math.random() * 400 - 200;
+            positions[i * 3 + 1] = Math.random() * 200 + 100;
+            positions[i * 3 + 2] = Math.random() * 400 - 200;
+            velocities.push(new THREE.Vector3(Math.random() * -1 - 0.5, Math.random() * -1, 0));
+        }
+    
+        // set the position
+        meteorGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+        // create the material
+        const meteorMaterial = new THREE.PointsMaterial({
+            color: 0xffcc66,
+            size: 2,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending
+        });
+    
+        // construct the meteors from our geometry and materials
+        const meteors = new THREE.Points(meteorGeometry, meteorMaterial);
+
+        // add it to the scene
+        scene.add(meteors);
+    
+        /**
+         * function to animate our meteors so that they move
+         */
+        function animateMeteors() {
+            // retrieve the positions
+            const positions = meteorGeometry.attributes.position.array;
+
+            // for all the positions (move them)
+            for (let i = 0; i < meteorCount; i++) {
+                positions[i * 3] += velocities[i].x;
+                positions[i * 3 + 1] += velocities[i].y;
+                positions[i * 3 + 2] += velocities[i].z;
+    
+                // reset if it is gone/dissappears
+                if (positions[i * 3 + 1] < -100) {
+                    positions[i * 3] = Math.random() * 400 - 200;
+                    positions[i * 3 + 1] = Math.random() * 200 + 100;
+                    positions[i * 3 + 2] = Math.random() * 400 - 200;
+                }
+            }
+            meteorGeometry.attributes.position.needsUpdate = true;
+            requestAnimationFrame(animateMeteors);
+        }
+    
+        // call the animation
+        animateMeteors();
+    }    
 
     /**
      * TODO:
@@ -1337,7 +1395,8 @@ function startGame() {
             }
         }
     }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     /**
      * exhaust animation
      */
