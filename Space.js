@@ -192,12 +192,12 @@ function startGame() {
     const shields = [];
     let shieldActive = false;
     let shieldActivationTime = 0;
-    setInterval(createShieldPowerUp, 7500);
+    setInterval(createShieldPowerUp, 7000);
 
     // regeneration health power up management
     const regenerations = [];
     let regenStatus = false;
-    setInterval(createRegenerationHealthPowerUp, 20000);
+    setInterval(createRegenerationHealthPowerUp, 15000);
 
     // initialize a loader to load models in .glb format
     const loader = new GLTFLoader();
@@ -1164,15 +1164,15 @@ function startGame() {
             // create the THREE Group for heart icons and map it to valid values meaning...
             // all the way back and where the spaceship can possibly be in terms of y axis and z axis
             const singleHealthIconGroup = new THREE.Group();
-            singleHealthIconGroup.position.set(-25, 0.5, Math.random() * 11 - 5.5);
+            singleHealthIconGroup.position.set(-25, 0.5, Math.random() * 8 - 4);
             
             // get the actual power up icon and scale it smaller
             const regenerateHealthPowerUp = gltf.scene;
-            regenerateHealthPowerUp.scale.set(0.3, 0.3, 0.3);
+            regenerateHealthPowerUp.scale.set(0.15, 0.15, 0.15);
 
-            // create a hitbox for the icon and scale it smaller
-            const healthIconHitbox = new THREE.BoxHelper(regenerateHealthPowerUp, 'pink')
-            healthIconHitbox.scale.set(0.3, 0.3, 0.3);
+            // create a pink hitbox for the icon and scale it smaller
+            const healthIconHitbox = new THREE.BoxHelper(regenerateHealthPowerUp, 'pink');
+            healthIconHitbox.scale.set(0.15, 0.15, 0.15);
 
             // update it to recalculate bounding box and get correct dimensions
             healthIconHitbox.update();
@@ -1202,7 +1202,6 @@ function startGame() {
         
             // loop through the regenerations
             regenerations.forEach(regenerationGroup => {
-        
                 // ensure we have a valid box helper for the regeneration
                 if (regenerationGroup.children[1]) {
                     // retrieve the hit box for the regeneration
@@ -1211,7 +1210,7 @@ function startGame() {
                     // if the boxes intersect this means the spaceship has collided with the health icon
                     if (rocketHitbox.intersectsBox(regenHitbox)) {
                         // update status to user
-                        console.log("You have collected a power-up! The health restores back to max health.")
+                        console.log("You have collected a power-up! The health restores back to max health.");
 
                         // set the health back to 100 and update the health bar accordingly
                         rocketHealth = 100;
@@ -1224,7 +1223,7 @@ function startGame() {
                         })
 
                         // remove the regeneration health group from the scene
-                        scene.remove(regenerationGroup)
+                        scene.remove(regenerationGroup);
                     }
                 }
             });
@@ -1280,15 +1279,35 @@ function startGame() {
      * Function to create a shield power-up icon
      */
     function createShieldPowerUp() {
+        // load our 3D shield icon model
         loader.load('models/shieldIcon.glb', function (gltf) {
-            const shieldPowerUp = gltf.scene;
-            
-            shieldPowerUp.position.set(-25, -2, (Math.random()*15)-1); // Spawn randomly along the Z-axis
-            shieldPowerUp.scale.set(4, 4, 4);
+            // create the THREE Group for shield icons and map it to valid values meaning...
+            // all the way back and where the spaceship can possibly be in terms of y axis and z axis
+            const singleShieldIconGroup = new THREE.Group();
+            singleShieldIconGroup.position.set(-25, 0.5, Math.random() * 8 - 4)
 
-            scene.add(shieldPowerUp);
-            shields.push(shieldPowerUp); 
+            // get the actual power up icon and scale it and rotate it so that it is facing the correct orientation
+            const shieldPowerUp = gltf.scene;
+            shieldPowerUp.scale.set(2, 2, 2);
             shieldPowerUp.rotateY(Math.PI / 2);
+
+            // create a grey hitbox for the icon and scale it and rotate it so that it matches the icon
+            const shieldIconHitbox = new THREE.BoxHelper(shieldPowerUp, 'grey');
+            shieldIconHitbox.scale.set(2, 2, 2);
+            shieldIconHitbox.rotateY(Math.PI / 2);
+            
+            // update it to recalculate bounding box and get correct dimensions
+            shieldIconHitbox.update()
+
+            // add them to the group
+            singleShieldIconGroup.add(shieldPowerUp);
+            singleShieldIconGroup.add(shieldIconHitbox);
+            
+            // push it to the array for all shields
+            shields.push(singleShieldIconGroup)
+
+            // add it to the scene
+            scene.add(singleShieldIconGroup);
         }, undefined, function (error) {
             console.error("Error loading shield power-up:", error);
         });
@@ -1298,57 +1317,62 @@ function startGame() {
      * update the shield power up and apply it to the spaceship based on the distance
      */
     function updateShieldPowerUp() {
-        shields.forEach((shieldIcon, index) => {
-            shieldIcon.position.x += 0.15; // Move shield icons from left to right
+        // ensure we have a valid box helper for the spaceship
+        if (rocketGroup.children[2]) {
+            // retrieve the hit box for the spaceship
+            const rocketHitbox = new THREE.Box3().setFromObject(rocketGroup.children[2]);
 
-            // Calculate distance between the spaceship and the shield icon
-            const xDistance = rocketGroup.position.x - shieldIcon.position.x;
-            const zDistance = rocketGroup.position.z - shieldIcon.position.z;
-            const distance = Math.sqrt(xDistance * xDistance + zDistance * zDistance);
+            // loop through the shields
+            shields.forEach(shieldGroup => {
+                // ensure we have a valid box helper for the shield
+                if (shieldGroup.children[1]) {
+                    // retrieve the hit box for the shield
+                    const shieldHitbox = new THREE.Box3().setFromObject(shieldGroup);
 
-            // console.log(distance);
-            // TODO: Fix the distance...
-            // original condition was ========= distance < 6.5
-            if (xDistance < 0.1 && zDistance < -2) { // If shield icon is close to the spaceship
-                // console.log("Debug Values...")
-                // console.log(xDistance);
-                // console.log(zDistance);
+                    // if the boxes intersect this means the spaceship has collided with the shield icon
+                    if (rocketHitbox.intersectsBox(shieldHitbox)) {
+                        // update status to user
+                        console.log("You have collected a power-up! Thie shield protects you from all asteroids temporarily.");
 
-                console.log("Shield collected!");
+                        // set the shield states...
+                        // if the shield is not currently active then activate it
+                        if (!shieldActive) {
+                            shield.visible = true;
+                            shieldActive = true;
+                            shieldActivationTime = Date.now();
+                        }
 
-                if (!shieldActive) {
-                    shield.visible = true; // Turn on the shield
-                    shieldActive = true;
-                    shieldActivationTime = Date.now(); // Start shield timer
+                        // remove everything from the shield group because the user has collected it
+                        shieldGroup.children.forEach(child=>{
+                            shieldGroup.remove(child);
+                        })
+
+                        // remove the shield group from the scene
+                        scene.remove(shieldGroup);
+                    }
                 }
 
-                // Remove shield icon after collecting
-                scene.remove(shieldIcon);
-                shields.splice(index, 1);
-            }
+            });
 
-            if (shieldIcon.position.x > 15) { // Remove shield icons when they go off-screen
-                scene.remove(shieldIcon);
-                shields.splice(index, 1);
-            }
-        });
+            // handle shield expiration and colour change
+            if (shieldActive) {
+                // progress from 0 to 1 over 5 seocnds
+                let elapsed = (Date.now() - shieldActivationTime) / 5000;
 
-        // Handle shield expiration and color change
-        if (shieldActive) {
-            let elapsed = (Date.now() - shieldActivationTime) / 5000; // Progress from 0 to 1 over 5 seconds
+                // smoothly transition colour from blue to yellow
+                let shieldColour = new THREE.Color().lerpColors(
+                    new THREE.Color(0x0050FF), // start with blue
+                    new THREE.Color(0xFFFF00), // end with yellow
+                    elapsed // interpolation factor (0 to 1)
+                );
+                shield.material.color.set(shieldColour);
 
-            // Smoothly transition color from blue to yellow
-            let shieldColor = new THREE.Color().lerpColors(
-                new THREE.Color(0x0050FF), // Start (blue)
-                new THREE.Color(0xFFFF00), // End (yellow)
-                elapsed // Interpolation factor (0 to 1)
-            );
-            shield.material.color.set(shieldColor);
-
-            if (elapsed >= 1) { // Turn off shield after 5 seconds
-                shield.visible = false;
-                shieldActive = false;
-                console.log("Shield deactivated.");
+                // turn off the shield after 5 seconds
+                if (elapsed >= 1) {
+                    shield.visible = false;
+                    shieldActive = false;
+                    console.log("Shield is deactivated.")
+                }
             }
         }
     }
@@ -1356,7 +1380,7 @@ function startGame() {
     /**
      * function used to check if the hitbox of an asteroid collides with the hitbox of the spaceship
      * */
-    function checkForAsteroidCollision(){        
+    function checkForAsteroidCollision(){
         // ensure we have a valid box helper for the spaceship
         if (rocketGroup.children[2]){
             // retrieve the hit box for the spaceship
@@ -1442,6 +1466,9 @@ function startGame() {
         // check if the spaceship has hit the health power up
         updateRegenerationHealthPowerUp();
 
+        // check if the spaceship has hit the shield power up
+        updateShieldPowerUp();
+
         // animate our stars and create the star field essentially
         animateStars();
 
@@ -1482,16 +1509,23 @@ function startGame() {
         // start the secondary bullet animation
         secondaryBulletAnimation();
 
-        // check if the spaceship has hit the shield power up
-        updateShieldPowerUp();
-
         // for every regeneration move it along the x axis so that it comes all the way from the back to the front
         // it also removes any regenerations if they pass the spaceship as the user has not collected it (to avoid cluttering and lagging the scene)
         regenerations.forEach((regenerationGroup, index) => {
             regenerationGroup.position.x += 0.15;
             if (regenerationGroup.position.x > 15) {
                 scene.remove(regenerationGroup);
-                regenerations.splice(index, 1)
+                regenerations.splice(index, 1);
+            }
+        });
+
+        // for every shield move it along the x axis so that it comes all the way from the back to the front
+        // it also removes any shields if they pass the spaceship as the user has not collected it (to avoid cluttering and lagging the scene)
+        shields.forEach((shieldGroup, index) => {
+            shieldGroup.position.x += 0.15;
+            if (shieldGroup.position.x > 15) {
+                scene.remove(shieldGroup);
+                shields.splice(index, 1);
             }
         });
 
