@@ -5,7 +5,6 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loadi
 import { FireEffect } from './fire.js'; // fire particles
 import FireParticleEffect from './fireParticleEffect/fire.js';
 import SmokeEffect from './rocketSmokeParticleEffect/smoke.js';
-import { materialIOR } from 'three/tsl';
 
 // variable to keep track of our game (initially the game is not started)
 let gameStatus = false;
@@ -234,26 +233,21 @@ function startGame() {
         // create geometries and materials
         const sphereGeometry = new THREE.ConeGeometry(1, 2, 16);
         const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xFFA500 });
+        
+        // Used for exaustAnimation
         orangeCone = new THREE.Mesh(sphereGeometry, sphereMaterial);
         orangeCone.position.set(0, 5.4, -10.25);
         orangeCone.rotation.x = -Math.PI / 2;
-
-        // add to our rocket
-        // rocket.add(orangeCone);
     
         orangeCone2 = new THREE.Mesh(sphereGeometry, sphereMaterial);
         orangeCone2.position.set(-1.5, 3, -10.25);
         orangeCone2.rotation.x = -Math.PI / 2;
 
-        // add to our rocket
-        // rocket.add(orangeCone2);
     
         orangeCone3 = new THREE.Mesh(sphereGeometry, sphereMaterial);
         orangeCone3.position.set(1.5, 3, -10.25);
         orangeCone3.rotation.x = -Math.PI / 2;
 
-        // add to our rocket
-        // rocket.add(orangeCone3);
 
     }, undefined, function (error) {
         console.error(error);
@@ -422,11 +416,9 @@ function startGame() {
 
             scene.add(bullet);
             bullets.push({ mesh: bullet, spawnTime: Date.now() }); // Store the spawn time of the bullet and the mesh itself
-            // console.log('Pew pew');
             missileFireEffects[bullet.uuid] = new FireEffect(scene);
         }
         if (event.key === 'f'){
-            //shield.visible = !shield.visible;
             warp.visible = !warp.visible; 
         }
         // Secondary Bullet - Fires when pressing "v"
@@ -444,7 +436,6 @@ function startGame() {
 
             scene.add(secondaryBullet);
             secondaryBullets.push(secondaryBullet);
-            // console.log('Secondary bullet fired');
         }
     });
 
@@ -1705,9 +1696,6 @@ function startGame() {
         if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
             fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
         }
-        //console.log(rocket.position.y)
-        //console.log(rocketGroup.position)
-        //console.log(rocketGroup.position.z);
 
         // if there are asteroids call the homing missiles functions
         if(asteroids.length != 0){updateHomingMissiles(bullets, asteroids)}
