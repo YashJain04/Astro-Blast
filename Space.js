@@ -437,7 +437,7 @@ function startGame() {
         if (event.key === 'v' && settings.ammo > 0 && now - lastSecondaryShotTimes >= 500) {
             lastSecondaryShotTimes = now;
             const secondaryBulletGeometry = new THREE.BoxGeometry(0.6, 0.2, 0.2); // Small rectangle
-            const secondaryBulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 }); // Yellow color
+            const secondaryBulletMaterial = new THREE.MeshBasicMaterial({ color: 0x40E0D0 }); // Yellow color
             const secondaryBullet = new THREE.Mesh(secondaryBulletGeometry, secondaryBulletMaterial);
             
             secondaryBullet.position.copy(rocketGroup.position);
