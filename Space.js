@@ -588,10 +588,12 @@ function startGame() {
 
                     // If the missile has collided with the target, remove it
                     if(closestTarget.position.distanceTo(missile.mesh.position) < 0.1) {
+                        createExplosion(closestTarget.position, material);
                         scene.remove(closestTarget);
+                        closestTarget
                         scene.remove(missile.mesh);
                         missiles.splice(i, 1);
-                        createExplosion(closestTarget.position, material);
+                        asteroids.splice(asteroids.indexOf(closestTarget), 1);
                         // Go closer to the target
                     }
                     
