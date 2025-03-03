@@ -144,7 +144,7 @@ function startGame() {
     // scene.add(verticalGrid, gridhelper);
 
     // add the controls, axis lines/helper, and the ambient lighting to the scene
-    scene.add(controls, axesHelper, ambientLight);
+    scene.add(controls, ambientLight);
 
     // keep track of the hit boxes (rectangles around objects)
     const hitboxes = []
