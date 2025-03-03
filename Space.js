@@ -270,35 +270,6 @@ function startGame() {
         console.error(error);
     });
 
-    /**
-     * TESTING SHIELD STUFF....
-     * 
-     *  const bubbleLoader = new THREE.TextureLoader();
-
-        // load the bubble
-        let someTexture = bubbleLoader.load('models/textures/bubble.jpg');
-
-        // create a shield for our rocket and add it to our group while scaling in size
-        const material = new THREE.MeshPhysicalMaterial({
-            transparent: true,
-            opacity: 0.9,
-            emissiveIntensity: 0.8,
-            roughness: 0,
-            metalness: 1,
-            transmission: 1,
-            clearcoat: 1,
-            clearcoatRoughness: 0,
-            reflectivity: 1,
-            map: someTexture
-        });    
-        
-        // create sphere geometry with slight distortions for a wavy effect
-        const shieldGeometry = new THREE.SphereGeometry(3.9, 64, 64);
-        const shield = new THREE.Mesh(shieldGeometry, material);
-     * 
-     * 
-     */
-
     // create a shield for our rocket and add it to our group while scaling in size
     const material = new THREE.PointsMaterial({
         color: 0x0050FF,
@@ -313,7 +284,7 @@ function startGame() {
     shield.scale.set(0.5, 0.5, 0.75);
     shield.visible = false;
 
-    // TODO: warp field (could be removed later, its just a placeholder)
+    // warp field
     const warpField = new THREE.PointsMaterial({
         color: 0x0050FF, // orange colour
         size: 0.1, // adjust size
@@ -719,9 +690,6 @@ function startGame() {
         if (rocketHealth <= 0) {
             // print the status of the game to the user in the console
             console.log("Game Over! Spaceship destroyed.");
-
-            // TODO:
-            // triggerExplosion();
             
             // call the end game function
             endGame();
@@ -792,8 +760,6 @@ function startGame() {
      */
     function createCelestialObjects() {
         createPlanetsAndMoon();
-        // TODO:
-        // createVolumetricNebula();
         createGlowingCometWithTail();
         createMeteorShower();
     }
@@ -902,8 +868,17 @@ function startGame() {
             // making the rings rotate around the z axis give a spinning effect (this is nicer - ignore comment above)
             planet.rotation.y += 0.005;
             rings.rotation.z += 0.005;
-            planet.position.x += 0.005
-            rings.position.x += 0.005
+
+            // planet should be coming towards user
+            planet.position.x += 0.005;
+            rings.position.x += 0.005;
+
+            // the user has passed saturn so since it's no longer visible to the user just remove it from the scene to prevent clutter and lag
+            // remove it after it passes the warp
+            if (planet.position.x > 125) {
+                scene.remove(planet);
+                scene.remove(rings);
+            }
         }
 
         // call the animation function to rotate our planet
@@ -1069,14 +1044,6 @@ function startGame() {
     }
 
     /**
-     * TODO:
-     * create volumetric nebula...
-     */
-    function createVolumetricNebula() {
-    }
-
-    /**
-     * TODO:
      * create a glowing comet with a tail and streak
      */
     function createGlowingCometWithTail() {
@@ -1232,42 +1199,6 @@ function startGame() {
     
         // call the animation
         animateMeteors();
-    }
-
-    /**
-     * TODO:
-     * function to explode the spaceship on destruction
-     */
-    function triggerExplosion() {
-        // create a particle system for explosion when the spaceship dies
-        const geometry = new THREE.SphereGeometry(5, 32, 32);
-        const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const explosion = new THREE.Mesh(geometry, material);
-
-        // position it too where the rocket was
-        explosion.position.set(rocket.position.x, rocket.position.y, rocket.position.z);
-        scene.add(explosion);
-
-
-        // animate it
-        animateExplosion(explosion);
-    }
-
-    /**
-     * TODO:
-     * function to animate the explosion
-     * @param {} explosion 
-     */
-    function animateExplosion(explosion) {
-        // create some animation
-        const scaleTween = new THREE.TWEEN.Tween(explosion.scale)
-            .to({ x: 10, y: 10, z: 10 }, 500)
-            .onComplete(() => {
-
-                // remove the animation
-                scene.remove(explosion);
-            });
-        scaleTween.start();
     }
 
     /**
@@ -1455,7 +1386,7 @@ function startGame() {
             // create the THREE Group for shield icons and map it to valid values meaning...
             // all the way back and where the spaceship can possibly be in terms of y axis and z axis
             const singleShieldIconGroup = new THREE.Group();
-            singleShieldIconGroup.position.set(-25, 0.5, Math.random() * 8 - 4)
+            singleShieldIconGroup.position.set(-25, 0.5, Math.random() * (5 - (-1)) + (-1))
 
             // get the actual power up icon and scale it and rotate it so that it is facing the correct orientation
             const shieldPowerUp = gltf.scene;
@@ -1647,10 +1578,8 @@ function startGame() {
             console.log("Shield absorbed the asteroid! Explosion triggered.");
             createExplosion(asteroidGroup.position, material);
         } else {
-            // If no shield is active, apply damage to the spaceship
-            
+            // create explosion
             createExplosion(asteroidGroup.position, material);
-            updateHealthBar(true);
         }
 
         // remove everything from the asteroid group because the user has hit the asteroid
