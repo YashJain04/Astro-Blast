@@ -19,7 +19,7 @@ if (!gameStatus) {
     console.log("The game has not started yet.")
 
     // load our background image
-    document.body.style.backgroundImage = "url('models/spaceBackground6.webp')";
+    document.body.style.backgroundImage = "url('models/backgrounds/landing.webp')";
 
     // preserve the aspect ratio for high quality and cover the entire page
     document.body.style.backgroundSize = 'cover';
@@ -645,7 +645,7 @@ function startGame() {
             
             // give the health bar a rock-like appearance
             healthBar.style.backgroundColor = 'gray';
-            healthBar.style.backgroundImage = 'url("models/rockTexture2.png")'; // load the rock texture
+            healthBar.style.backgroundImage = 'url("models/textures/solidify.png")'; // load the rock texture
             healthBar.style.backgroundSize = 'cover';
             healthBar.style.borderRadius = '5px';
             healthBar.style.boxShadow = 'inset 0 0 10px rgba(0, 0, 0, 0.5)';
@@ -781,7 +781,7 @@ function startGame() {
     function createEarth() {
         // load our earth texture
         const textureLoader = new THREE.TextureLoader();
-        const planetTexture = textureLoader.load('models/earthTexture.jpeg');
+        const planetTexture = textureLoader.load('models/textures/earth.jpeg');
 
         // create sphere for the earth
         const planetGeometry = new THREE.SphereGeometry(5, 64, 64);
@@ -815,10 +815,10 @@ function startGame() {
         const textureLoader = new THREE.TextureLoader();
         
         // planet texture
-        const planetTexture = textureLoader.load('models/saturnTexture.jpg');
+        const planetTexture = textureLoader.load('models/textures/saturn.jpg');
 
         // saturn has rings so give that a nice texture too
-        const ringTexture = textureLoader.load('models/ringsTexture.jpg');
+        const ringTexture = textureLoader.load('models/textures/rings.jpg');
 
         // create sphere for saturn
         const planetGeometry = new THREE.SphereGeometry(5, 64, 64);
@@ -868,7 +868,7 @@ function startGame() {
     function createVenus() {
         // load the venus texture
         const textureLoader = new THREE.TextureLoader();
-        const planetTexture = textureLoader.load('models/venusTexture.jpg');
+        const planetTexture = textureLoader.load('models/textures/venus.jpg');
 
         // create sphere for venus
         const planetGeometry = new THREE.SphereGeometry(5, 64, 64);
@@ -900,7 +900,7 @@ function startGame() {
     function createMoon() {
         // load our moon texture
         const textureLoader = new THREE.TextureLoader();
-        const moonTexture = textureLoader.load('models/moonTexture.jpg');
+        const moonTexture = textureLoader.load('models/textures/moon.jpg');
 
         // create a sphere for the moon
         const moonGeometry = new THREE.SphereGeometry(2, 64, 64);
@@ -1270,7 +1270,7 @@ function startGame() {
 
         // create a sprite for a broken heart like in video games
         const heartImage = document.createElement('img');
-        heartImage.src = 'models/heartbreak-Photoroom.png';
+        heartImage.src = 'models/sprites/heartbreak.png';
         heartImage.alt = 'Broken Heart';
 
         // apply styles
