@@ -38,7 +38,7 @@ export class FireEffect {
         // Adjust particle spawn spread based on size
         positionAttribute.setXYZ(
             index,
-            origin.x, // Spread X based on size
+            origin.x+1, // Spread X based on size 
             locationY,  // Spread Y
             origin.z // Spread Z
         );
@@ -66,13 +66,13 @@ export class FireEffect {
             const particle = this.fireParticles[i];
             const vertex = new THREE.Vector3(
                 positionAttribute.getX(particle.index),
-                positionAttribute.getY(particle.index),
+                positionAttribute.getY(particle.index)-0.1,
                 positionAttribute.getZ(particle.index)
             );
             vertex.add(particle.direction);
             positionAttribute.setXYZ(particle.index, vertex.x, vertex.y, vertex.z);
 
-            particle.lifeTime--;
+            particle.lifeTime--; 
 
             if (particle.lifeTime <= 0) {
                 this.fireParticles.splice(i, 1);

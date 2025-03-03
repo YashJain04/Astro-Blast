@@ -2,9 +2,10 @@
 import { initKeyboardControls, fpsController, debugCamController, settings, ammoController, showHitboxController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
-// import { FireEffect } from './fire.js'; // fire particles
+import { FireEffect } from './fire.js'; // fire particles
 import FireParticleEffect from './fireParticleEffect/fire.js';
 import SmokeEffect from './rocketSmokeParticleEffect/smoke.js';
+import { materialIOR } from 'three/tsl';
 
 // variable to keep track of our game (initially the game is not started)
 let gameStatus = false;
@@ -408,13 +409,7 @@ function startGame() {
     // call this function thus creating asteroids every second
     setInterval(createAsteroid, 1000);
 
-    function createExplosion(position) {
-        const material = new THREE.PointsMaterial({
-            color: 0xEEEEEE,
-            size: 0.1,
-            transparent: false,
-            opacity: 1.0
-        });
+    function createExplosion(position, material) {
         const explosion = new THREE.Points(new THREE.SphereGeometry(5), material);
         explosion.geometry.scale(0.01, 0.01, 0.01);
         explosion.position.set(position.x, position.y, position.z);
@@ -430,7 +425,7 @@ function startGame() {
     camera.rotateX(-0.3);
 
     const missileFireEffects = {};
-    // const fireEffectShip = new FireEffect(rocketGroup); // used for fire particle
+    const fireEffectShip = new FireEffect(rocketGroup); // used for fire particle
 
     // add a listener for key downs
     document.addEventListener('keydown', (event) => {
@@ -459,7 +454,7 @@ function startGame() {
             missileFireEffects[bullet.uuid] = new FireEffect(scene);
         }
         if (event.key === 'f'){
-            shield.visible = !shield.visible;
+            //shield.visible = !shield.visible;
             warp.visible = !warp.visible; 
         }
         // Secondary Bullet - Fires when pressing "v"
@@ -584,12 +579,19 @@ function startGame() {
                 let closestTarget = findClosestTarget(missile.mesh.position, targets);
                 if (closestTarget) { // Check if a target was found
                 
+                    const material = new THREE.PointsMaterial({
+                        color: 0xFFA500,
+                        size: 0.1,
+                        transparent: false,
+                        opacity: 1.0
+                    });
+
                     // If the missile has collided with the target, remove it
                     if(closestTarget.position.distanceTo(missile.mesh.position) < 0.1) {
                         scene.remove(closestTarget);
                         scene.remove(missile.mesh);
                         missiles.splice(i, 1);
-                        createExplosion(closestTarget.position);
+                        createExplosion(closestTarget.position, material);
                         // Go closer to the target
                     }
                     
@@ -898,6 +900,8 @@ function startGame() {
             // making the rings rotate around the z axis give a spinning effect (this is nicer - ignore comment above)
             planet.rotation.y += 0.005;
             rings.rotation.z += 0.005;
+            planet.position.x += 0.005
+            rings.position.x += 0.005
         }
 
         // call the animation function to rotate our planet
@@ -1571,6 +1575,13 @@ function startGame() {
         for (let i = secondaryBullets.length - 1; i >= 0; i--) {
             secondaryBullets[i].position.x -= 0.15;
 
+            const material = new THREE.PointsMaterial({
+                color: 0xFFA500,
+                size: 0.1,
+                transparent: false,
+                opacity: 1.0
+            });
+
             // if there are asteroids
             if (asteroids.length > 0){
                 let closestTarget = findClosestTarget(secondaryBullets[i].position, asteroids);
@@ -1579,7 +1590,7 @@ function startGame() {
                     scene.remove(closestTarget);
                     scene.remove(secondaryBullets[i]);
                     secondaryBullets.splice(i, 1);
-                    createExplosion(closestTarget.position);
+                    createExplosion(closestTarget.position, material);
                 }
             }
 
@@ -1622,6 +1633,24 @@ function startGame() {
      * called when a collision between an asteroid and the rocket has been detected
      * */
     function handleCollision(asteroidGroup){
+
+        const material = new THREE.PointsMaterial({
+            color: 0xFF474C,
+            size: 0.1,
+            transparent: false,
+            opacity: 1.0
+        });
+        if (shield.visible) {
+            material.color = new THREE.Color(0xADDFFF);
+            console.log("Shield absorbed the asteroid! Explosion triggered.");
+            createExplosion(asteroidGroup.position, material);
+        } else {
+            // If no shield is active, apply damage to the spaceship
+            
+            createExplosion(asteroidGroup.position, material);
+            updateHealthBar(true);
+        }
+
         // remove everything from the asteroid group because the user has hit the asteroid
         asteroidGroup.children.forEach(child=>{
             asteroidGroup.remove(child)
@@ -1632,11 +1661,6 @@ function startGame() {
 
         // update the health bar accordingly (user hit the asteroid so spaceship takes damage)
         updateHealthBar(true);
-
-        // TODO: REMOVE THIS....?
-        // console.log(asteroidGroup.children)
-        //the following line of code doesnt actually do anything...
-        // asteroids.filter(a=>a==asteroidGroup)
     }
 
     // FPS related stuff
@@ -1707,9 +1731,9 @@ function startGame() {
         // animate our spaceship so that it jiggles and wiggles
         animateSpaceship()
 
-        // if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
-        //     fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
-        // }
+        if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
+            fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
+        }
         //console.log(rocket.position.y)
         //console.log(rocketGroup.position)
         //console.log(rocketGroup.position.z);
