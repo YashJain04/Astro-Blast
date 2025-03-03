@@ -797,8 +797,19 @@ function startGame() {
 
         // rotate the planet continuously
         function animateEarth() {
-            requestAnimationFrame(animate)
+            requestAnimationFrame(animateEarth);
+        
+            // get time
+            const time = Date.now() * 0.0005;
+        
+            // how big the circle should be
+            const radius = 80;
 
+            // move around x and y and z
+            planet.position.x = Math.cos(time) * radius;
+            planet.position.y = Math.sin(time) * radius;
+            planet.position.z = Math.sin(time) * radius;
+        
             // rotate the planet around the y axis
             planet.rotation.y += 0.01;
         }
@@ -852,10 +863,12 @@ function startGame() {
 
         // rotate the planet so that it is moving
         function animateSaturn() {
-            requestAnimationFrame(animate);
-
+            requestAnimationFrame(animateSaturn);
+        
             // we only want the planet to rotate - NOT THE RINGS
+            // making the rings rotate around the z axis give a spinning effect (this is nicer - ignore comment above)
             planet.rotation.y += 0.005;
+            rings.rotation.z += 0.005;
         }
 
         // call the animation function to rotate our planet
@@ -876,7 +889,7 @@ function startGame() {
 
         // construct our planet and add it to the scene
         const venus = new THREE.Mesh(planetGeometry, planetMaterial);
-        venus.position.set(-20, 0, 25);
+        venus.position.set(-5, 0, -10);
         scene.add(venus);
 
         // add a nice atmosphere (venus is dark brownish)
@@ -885,6 +898,16 @@ function startGame() {
         // start animating our venus so that it is rotating
         function animateVenus() {
             requestAnimationFrame(animateVenus);
+
+            // get time
+            const time = Date.now() * 0.00025;
+
+            // how big the circle should be
+            const radius = 80;
+
+            // move around x and z
+            venus.position.x = Math.cos(time) * radius;
+            venus.position.z = Math.sin(time) * radius;
 
             // rotate venus around the y axis
             venus.rotation.y += 0.005;
@@ -908,7 +931,7 @@ function startGame() {
 
         // construct our moon and add it to the scene
         const moon = new THREE.Mesh(moonGeometry, moonMaterial);
-        moon.position.set(-5, 0, -10);
+        moon.position.set(-60, 0, 25);
         scene.add(moon);
 
         // add an atmosphere for our moon which is greyish
@@ -917,6 +940,16 @@ function startGame() {
         // start animating our moon
         function animateMoon() {
             requestAnimationFrame(animateMoon);
+
+            // get time
+            const time = Date.now() * 0.0005;
+
+            // how big the circle should be
+            const radius = 80;
+
+            // move around y and z
+            moon.position.y = Math.cos(time) * radius;
+            moon.position.z = Math.sin(time) * radius;
 
             // rotate the moon around the y axis
             moon.rotation.y += 0.01;
@@ -1096,9 +1129,6 @@ function startGame() {
             if (comet.position.y > 300) {
                 scene.remove(comet);
             }
-
-            // render
-            renderer.render(scene, camera);
         }
         
         // call the animation
