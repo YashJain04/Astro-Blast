@@ -2,10 +2,16 @@
 import { initKeyboardControls, fpsController, debugCamController, settings, ammoController, showHitboxController } from './guiControls.js'; 
 import { OrbitControls } from 'three/examples/jsm/Addons.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'; // allows loading models in .glb format
-import { FireEffect } from './fire.js'; // fire particles
+// import { FireEffect } from './fire.js'; // fire particles
+import FireParticleEffect from './fireParticleEffect/fire.js';
+import SmokeEffect from './rocketSmokeParticleEffect/smoke.js';
+
 
 // variable to keep track of our game (initially the game is not started)
 let gameStatus = false;
+
+let smokeEffect = null
+let fireParticleSystems = []
 
 // if the game has not started
 if (!gameStatus) {
@@ -79,7 +85,7 @@ if (!gameStatus) {
  */
 function startGame() {
     // indicate that the game has started
-    console.log("Game Started!")
+    // console.log("Game Started!")
 
     // render our health bar right away
     const healthBar = document.getElementById('healthBar');
@@ -92,6 +98,7 @@ function startGame() {
 
     // initialize a camera to look at scene's content and drawings
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    smokeEffect = new SmokeEffect(scene, camera)
 
     // setting up the camera's position
     camera.position.x = 6;
@@ -200,6 +207,12 @@ function startGame() {
         scene.add(gltf.scene);
         rocket = gltf.scene;
 
+        fireParticleSystems.push(
+            new FireParticleEffect(rocket, new THREE.Vector3(0, 5.4, -9.5)),
+            new FireParticleEffect(rocket, new THREE.Vector3(-1.5, 3, -9.5)),
+            new FireParticleEffect(rocket, new THREE.Vector3(1.5, 3, -9.5))
+        )
+
         
         // add rocket to our rocket group
         rocketGroup.add(rocket)
@@ -228,21 +241,21 @@ function startGame() {
         orangeCone.rotation.x = -Math.PI / 2;
 
         // add to our rocket
-        rocket.add(orangeCone);
+        // rocket.add(orangeCone);
     
         orangeCone2 = new THREE.Mesh(sphereGeometry, sphereMaterial);
         orangeCone2.position.set(-1.5, 3, -10.25);
         orangeCone2.rotation.x = -Math.PI / 2;
 
         // add to our rocket
-        rocket.add(orangeCone2);
+        // rocket.add(orangeCone2);
     
         orangeCone3 = new THREE.Mesh(sphereGeometry, sphereMaterial);
         orangeCone3.position.set(1.5, 3, -10.25);
         orangeCone3.rotation.x = -Math.PI / 2;
 
         // add to our rocket
-        rocket.add(orangeCone3);
+        // rocket.add(orangeCone3);
 
     }, undefined, function (error) {
         // in case of error
@@ -397,7 +410,7 @@ function startGame() {
     camera.rotateX(-0.3);
 
     const missileFireEffects = {};
-    const fireEffectShip = new FireEffect(rocketGroup); // used for fire particle
+    // const fireEffectShip = new FireEffect(rocketGroup); // used for fire particle
 
     // add a listener for key downs
     document.addEventListener('keydown', (event) => {
@@ -422,13 +435,12 @@ function startGame() {
 
             scene.add(bullet);
             bullets.push({ mesh: bullet, spawnTime: Date.now() }); // Store the spawn time of the bullet and the mesh itself
-            console.log('Pew pew');
+            // console.log('Pew pew');
             missileFireEffects[bullet.uuid] = new FireEffect(scene);
         }
         if (event.key === 'f'){
             shield.visible = !shield.visible;
             warp.visible = !warp.visible; 
-            fireEffectShip.visible();
         }
         // Secondary Bullet - Fires when pressing "v"
         if (event.key === 'v' && settings.ammo > 0 && now - lastSecondaryShotTimes >= 500) {
@@ -445,7 +457,7 @@ function startGame() {
 
             scene.add(secondaryBullet);
             secondaryBullets.push(secondaryBullet);
-            console.log('Secondary bullet fired');
+            // console.log('Secondary bullet fired');
             
         }
     });
@@ -1376,8 +1388,10 @@ function startGame() {
     }
 
     // FPS related stuff
-    let previousDelta = 0
-    function animate(currentDelta) {
+let previousDelta = 0
+function animate(currentDelta) {
+
+    console.log(rocketHealth)
 
         if (showHitboxController.getValue()){
             hitboxes.forEach(hitbox=>{
@@ -1392,6 +1406,18 @@ function startGame() {
         }
 
         checkForAsteroidCollision()
+        fireParticleSystems.forEach(fireParticleSystem=>{
+            fireParticleSystem.update()
+        })
+    
+        if (rocket && smokeEffect && rocketHealth <= 50){
+            let initialSmokePosition = new THREE.Vector3(0, 1, 0)
+            let rocketPos = new THREE.Vector3(0, 0, 0) 
+            rocket.getWorldPosition(rocketPos)
+            initialSmokePosition.add(rocketPos)
+            // console.log(initialSmokePosition)
+            smokeEffect.update(initialSmokePosition)
+        }
         
 
         // console.log()
@@ -1414,9 +1440,9 @@ function startGame() {
         }
 
         animateSpaceship()
-        if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
-            fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
-        }
+        // if (rocketGroup && rocket && rocketGroup.position && rocket.position) { // It kept crashing for some reason withouth this (I'm guessing its trying to access the position before its created?)
+        //     fireEffectShip.animate(rocketGroup.position.z, rocket.position.y, 1); 
+        // }
         //console.log(rocket.position.y)
         //console.log(rocketGroup.position)
         //console.log(rocketGroup.position.z);
