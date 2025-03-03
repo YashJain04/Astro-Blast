@@ -361,7 +361,7 @@ function startGame() {
         loader.load(`models/asteroids/asteroid${randomlyChosenAsteroidModel}.glb`, function (gltf) {
 
             const singleAsteroidGroup = new THREE.Group() //THREE.Group used to store a single asteroid
-            singleAsteroidGroup.position.set(-25, 2, Math.random() * 14 - 7); // Start from the left side with random Z position
+            singleAsteroidGroup.position.set(-25, 0, Math.random() * 14 - 7); // Start from the left side with random Z position
             
             if (gameStatus) {
                 scene.add(singleAsteroidGroup)
@@ -1353,15 +1353,24 @@ function startGame() {
      * function used to check if the hitbox of an asteroid collides with the hitbox of the spaceship
      * */
     function checkForAsteroidCollision(){
+
+        console.log(rocketGroup.children[3]);
+
+        console.log("is this even running")
         
 
         if (rocketGroup.children[3]){
+            console.log("dude this is getting exec..")
             const rocketHitbox = new THREE.Box3().setFromObject(rocketGroup.children[3]) 
 
             asteroids.forEach(asteroidGroup=>{
                 if (asteroidGroup.children[1]){
                     const asteroidHitbox = new THREE.Box3().setFromObject(asteroidGroup) 
+                    console.log("Rocket Hitbox:", rocketHitbox);
+                    console.log("Asteroid Hitbox:", asteroidHitbox);
+
                     if (rocketHitbox.intersectsBox(asteroidHitbox)){
+                        console.log("EFAINOFKDNAKFNAKLFNKLDSF DKALSFBKLABFKLAFBKLABFKALBFKAL");
                         // console.log(asteroidGroup.children[0].children[0].position)
                         handleCollision(asteroidGroup)
                     }
